@@ -359,8 +359,13 @@ function fullRebuild(){
   renderBracket();
 }
 
-function pickWinner(id,team){if(!M[id]||!team)return;M[id].winner=team;fullRebuild();}
-function pickChampion(team){champion=team;renderBracket();}
+function pickWinner(id,team){
+  if(!M[id]||!team)return;
+  M[id].winner=team;
+  // Si es la final, el campeon se asigna automaticamente
+  if(id==='m104') champion=team;
+  fullRebuild();
+}
 
 // ── BRACKET VISUAL — árbol de torneo igual que FIFA ──
 function renderBracket(){
@@ -399,23 +404,19 @@ function renderBracket(){
   finalMatch.style.marginBottom='12px';
   center.appendChild(finalMatch);
 
-  // Campeón
+  // Campeon — se asigna automaticamente al ganador del partido de la Final (m104)
   const champBox=document.createElement('div');
   champBox.className='champ-trophy';
   champBox.innerHTML='<h3>🏆 Campeón</h3>';
-  const fin=M['m104'];
-  const finalists=[fin?.teamA,fin?.teamB].filter(Boolean);
-  if(finalists.length>0){
-    finalists.forEach(t=>{
-      const row=document.createElement('div');
-      const isCh=champion&&teamEq(champion,t);
-      row.className='champ-team'+(isCh?' selected':'');
-      row.innerHTML=`<span style="font-size:16px">${t.f}</span><span style="font-size:12px;flex:1">${t.n}</span>${isCh?'<span>🏆</span>':''}`;
-      row.onclick=()=>pickChampion(t);
-      champBox.appendChild(row);
-    });
+  const finWinner=M['m104']?.winner;
+  if(finWinner){
+    const row=document.createElement('div');
+    row.className='champ-team selected';
+    row.style.cursor='default';
+    row.innerHTML=`<span style="font-size:20px">${finWinner.f}</span><span style="font-size:13px;flex:1;font-weight:700">${finWinner.n}</span><span>🏆</span>`;
+    champBox.appendChild(row);
   } else {
-    champBox.innerHTML+='<div class="champ-empty">Pendiente</div>';
+    champBox.innerHTML+='<div class="champ-empty">Elige el ganador de la Final</div>';
   }
   center.appendChild(champBox);
   tree.appendChild(center);
@@ -533,7 +534,7 @@ function collectData(){
     qf_winners:['m97','m98','m99','m100'].map(id=>M[id]?.winner?.n||'').join('|'),
     sf_winners:['m101','m102'].map(id=>M[id]?.winner?.n||'').join('|'),
     final_winner:M['m104']?.winner?.n||'',
-    campeon:champion?.n||'',
+    campeon:M['m104']?.winner?.n||'',
     goleador:document.getElementById('extGol').value,
     revelacion:document.getElementById('extRev').value,
     pichichi:document.getElementById('extPich').value,
