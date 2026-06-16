@@ -204,8 +204,32 @@ function renderBet(bet){
 // pero usando los datos YA GUARDADOS de la apuesta en vez de clicks en vivo
 // ════════════════════════════════════════════════════════════
 
-// Mismo orden oficial FIFA de partidos de Ronda 32 que en el formulario
-const R32_ORDER = ['m74','m77','m73','m75','m83','m84','m81','m82','m76','m78','m79','m80','m86','m88','m85','m87'];
+// Definicion de origenes de cada partido de Ronda 32 (igual que en el formulario)
+// t:'g' = grupo[pos], t:'3' = indice del array de terceros
+const R32_SOURCES = {
+  m74:{a:{t:'g',g:'E',p:0}, b:{t:'3',i:0}},
+  m77:{a:{t:'g',g:'I',p:0}, b:{t:'3',i:1}},
+  m73:{a:{t:'g',g:'A',p:1}, b:{t:'g',g:'B',p:1}},
+  m75:{a:{t:'g',g:'F',p:0}, b:{t:'g',g:'C',p:1}},
+  m83:{a:{t:'g',g:'K',p:1}, b:{t:'g',g:'L',p:1}},
+  m84:{a:{t:'g',g:'H',p:0}, b:{t:'g',g:'J',p:1}},
+  m81:{a:{t:'g',g:'D',p:0}, b:{t:'3',i:4}},
+  m82:{a:{t:'g',g:'G',p:0}, b:{t:'3',i:5}},
+  m76:{a:{t:'g',g:'C',p:0}, b:{t:'g',g:'F',p:1}},
+  m78:{a:{t:'g',g:'E',p:1}, b:{t:'g',g:'I',p:1}},
+  m79:{a:{t:'g',g:'A',p:0}, b:{t:'3',i:2}},
+  m80:{a:{t:'g',g:'L',p:0}, b:{t:'3',i:3}},
+  m86:{a:{t:'g',g:'J',p:0}, b:{t:'g',g:'H',p:1}},
+  m88:{a:{t:'g',g:'D',p:1}, b:{t:'g',g:'G',p:1}},
+  m85:{a:{t:'g',g:'B',p:0}, b:{t:'3',i:6}},
+  m87:{a:{t:'g',g:'K',p:0}, b:{t:'3',i:7}},
+};
+
+function resolveR32Source(src, bet, tercerosList){
+  if(src.t==='g') return bet['G'+src.g+'_'+(src.p+1)] || null;
+  if(src.t==='3') return tercerosList[src.i] || null;
+  return null;
+}
 // Cruces de Octavos (mismos que el formulario): cada uno cruza 2 partidos de R32
 const OCT_DEFS = [
   {id:'m89', from:['m74','m77']}, {id:'m90', from:['m73','m75']},
@@ -224,10 +248,24 @@ const SF_DEFS = [
 ];
 
 function buildAndRenderBracket(tree, bet){
-  // 1. Asignar cada equipo de r32_winners a su ID de partido oficial
+  const tercerosList = (bet.terceros||'').split('|').map(s=>s.trim()).filter(Boolean);
   const r32List = (bet.r32_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  const winnerOf = {}; // mid -> nombre del equipo ganador de ese partido
-  R32_ORDER.forEach((mid,i)=>{ winnerOf[mid] = r32List[i] || null; });
+
+  // 1. Para cada partido de R32, resolver los DOS equipos reales (desde grupos/terceros)
+  //    y determinar cual es el ganador (segun r32_winners)
+  const winnerOf = {};
+  const teamsOf  = {}; // mid -> [teamA, teamB]
+  Object.keys(R32_SOURCES).forEach(mid=>{
+    const src = R32_SOURCES[mid];
+    const teamA = resolveR32Source(src.a, bet, tercerosList);
+    const teamB = resolveR32Source(src.b, bet, tercerosList);
+    teamsOf[mid] = [teamA, teamB];
+    // El ganador es el que aparece en r32_winners
+    let winner = null;
+    if(teamA && r32List.includes(teamA)) winner = teamA;
+    else if(teamB && r32List.includes(teamB)) winner = teamB;
+    winnerOf[mid] = winner;
+  });
 
   // 2. Para cada cruce de Octavos, deducir cual de los 2 posibles paso
   //    comparando con oct_winners (la lista de los que SI pasaron)
@@ -273,14 +311,14 @@ function buildAndRenderBracket(tree, bet){
     return row;
   }
 
-  // Para Ronda 32 no tenemos los 2 equipos originales del partido (solo el ganador),
-  // asi que mostramos el ganador junto a un marcador generico de "rival"
+  // Ronda 32: ahora SI tenemos los dos equipos reales (desde grupos/terceros)
   function r32MatchBox(mid){
     const wrap=document.createElement('div'); wrap.className='b-match';
+    const [teamA, teamB] = teamsOf[mid];
     const winner = winnerOf[mid];
-    wrap.appendChild(teamRow(winner, true));
+    wrap.appendChild(teamRow(teamA, winner && teamA===winner));
     const sep=document.createElement('div'); sep.className='b-sep'; wrap.appendChild(sep);
-    wrap.appendChild(teamRow(null, false));
+    wrap.appendChild(teamRow(teamB, winner && teamB===winner));
     return wrap;
   }
 
