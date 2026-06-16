@@ -197,38 +197,125 @@ function renderBet(bet){
   content.appendChild(extrasCard);
 }
 
-// ── BRACKET READ-ONLY usando los datos guardados de la apuesta ──
+// ── BRACKET READ-ONLY — reconstruye el arbol oficial FIFA usando los
+// equipos guardados en cada ronda, en el ORDEN OFICIAL de los cruces ──
+
+// Orden oficial de partidos de Ronda 32 (igual que en el formulario)
+const R32_MATCH_ORDER = ['m74','m77','m73','m75','m83','m84','m81','m82','m76','m78','m79','m80','m86','m88','m85','m87'];
+// Octavos: cada partido cruza dos resultados de R32 en este orden
+const OCT_CROSSES = [['m74','m77'],['m73','m75'],['m76','m78'],['m79','m80'],['m83','m84'],['m81','m82'],['m86','m88'],['m85','m87']];
+// Cuartos: cruces de octavos
+const QF_CROSSES = [['m89','m90'],['m93','m94'],['m91','m92'],['m95','m96']];
+// IDs de octavos para mapear con QF_CROSSES
+const OCT_IDS = ['m89','m90','m91','m92','m93','m94','m95','m96'];
+// Semis: cruces de cuartos
+const SF_CROSSES = [['m97','m98'],['m99','m100']];
+const QF_IDS = ['m97','m98','m99','m100'];
+
 function renderBracketReadOnly(tree, bet){
-  const r32 = (bet.r32_winners||'').split('|');
-  const oct = (bet.oct_winners||'').split('|');
-  const qf  = (bet.qf_winners||'').split('|');
-  const sf  = (bet.sf_winners||'').split('|');
+  // 1. Asignar equipos de R32 a sus IDs de partido en el orden oficial
+  const r32List = (bet.r32_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  const r32ByMatch = {};
+  R32_MATCH_ORDER.forEach((mid,i)=>{ r32ByMatch[mid] = r32List[i] || null; });
+
+  // 2. Octavos: usamos los equipos guardados en oct_winners, pero les asignamos
+  //    su posicion segun que partido de R32 ganaron (buscamos coincidencia)
+  const octList = (bet.oct_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  // Cada equipo de octavos viene de uno de los dos partidos de R32 que cruzan en ese octavo.
+  // Como no sabemos el orden exacto en que se guardo octavos, lo deducimos:
+  // recorremos los cruces oficiales y vemos cual de los dos equipos de R32 esta en octList
+  const octByMatch = {};
+  OCT_CROSSES.forEach(([midA, midB], idx)=>{
+    const ocId = OCT_IDS[idx];
+    const teamA = r32ByMatch[midA];
+    const teamB = r32ByMatch[midB];
+    // Buscamos cual de los dos paso (esta en octList) y lo quitamos de la lista para no reusarlo
+    let winner = null;
+    if(teamA && octList.includes(teamA)){ winner = teamA; octList.splice(octList.indexOf(teamA),1); }
+    else if(teamB && octList.includes(teamB)){ winner = teamB; octList.splice(octList.indexOf(teamB),1); }
+    octByMatch[ocId] = winner;
+  });
+
+  // 3. Cuartos: mismo proceso, cruzando los resultados de octavos
+  const qfList = (bet.qf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  const qfByMatch = {};
+  QF_CROSSES.forEach(([midA, midB], idx)=>{
+    const qfId = QF_IDS[idx];
+    const teamA = octByMatch[midA];
+    const teamB = octByMatch[midB];
+    let winner = null;
+    if(teamA && qfList.includes(teamA)){ winner = teamA; qfList.splice(qfList.indexOf(teamA),1); }
+    else if(teamB && qfList.includes(teamB)){ winner = teamB; qfList.splice(qfList.indexOf(teamB),1); }
+    qfByMatch[qfId] = winner;
+  });
+
+  // 4. Semis: cruzando resultados de cuartos
+  const sfList = (bet.sf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  const sfResults = []; // [ [teamA, teamB, winner], ... ]
+  SF_CROSSES.forEach(([midA, midB])=>{
+    const teamA = qfByMatch[midA];
+    const teamB = qfByMatch[midB];
+    let winner = null;
+    if(teamA && sfList.includes(teamA)){ winner = teamA; sfList.splice(sfList.indexOf(teamA),1); }
+    else if(teamB && sfList.includes(teamB)){ winner = teamB; sfList.splice(sfList.indexOf(teamB),1); }
+    sfResults.push([teamA, teamB, winner]);
+  });
+
   const champ = bet.campeon || bet.final_winner || '';
 
-  function makeCol(title, teams){
+  // ── RENDER ──
+  function makeMatchBox(teamA, teamB, winner){
+    const match=document.createElement('div'); match.className='b-match';
+    [teamA, teamB].forEach((t,idx)=>{
+      if(idx===1){ const sep=document.createElement('div'); sep.className='b-sep'; match.appendChild(sep); }
+      const row=document.createElement('div');
+      const isW = t && winner && t===winner;
+      row.className='b-team'+(isW?' winner':'')+(t?'':' tbd');
+      row.innerHTML = t ? `<span class="b-flag">${flagFor(t)}</span><span class="b-name">${t}</span>` : `<span class="b-name">—</span>`;
+      match.appendChild(row);
+    });
+    return match;
+  }
+
+  function makeCol(title, matchesData){
     const col=document.createElement('div'); col.className='b-col';
     const h=document.createElement('div'); h.className='b-col-header'; h.textContent=title; col.appendChild(h);
-    // Agrupar de 2 en 2 como partidos
-    for(let i=0;i<teams.length;i+=2){
-      const t1=teams[i], t2=teams[i+1];
-      const match=document.createElement('div'); match.className='b-match';
-      [t1,t2].forEach((t,idx)=>{
-        if(idx===1){ const sep=document.createElement('div'); sep.className='b-sep'; match.appendChild(sep); }
-        const row=document.createElement('div');
-        const isW = t && champ && false; // no marcamos ganador aqui, solo mostramos progresion
-        row.className='b-team'+(t?'':' tbd');
-        row.innerHTML = t ? `<span class="b-flag">${flagFor(t)}</span><span class="b-name">${t}</span>` : `<span class="b-name">—</span>`;
-        match.appendChild(row);
-      });
-      col.appendChild(match);
-    }
+    matchesData.forEach(([a,b,w])=>{ col.appendChild(makeMatchBox(a,b,w)); });
     return col;
   }
 
-  if(r32.filter(Boolean).length) tree.appendChild(makeCol('Ronda 32', r32));
-  if(oct.filter(Boolean).length) tree.appendChild(makeCol('Octavos', oct));
-  if(qf.filter(Boolean).length)  tree.appendChild(makeCol('Cuartos', qf));
-  if(sf.filter(Boolean).length)  tree.appendChild(makeCol('Semifinal', sf));
+  // Ronda 32: pares consecutivos segun R32_MATCH_ORDER (8 partidos, cada uno ya es un cruce real)
+  const r32Matches = [];
+  for(let i=0;i<R32_MATCH_ORDER.length;i+=2){
+    // En realidad cada mid de R32_MATCH_ORDER YA es un partido individual (no un par)
+    // r32ByMatch[mid] es el GANADOR de ese partido, no tenemos los dos equipos originales
+    // Por eso mostramos solo el ganador como resultado de cada partido de Ronda 32
+  }
+  // Mostramos Ronda 32 como lista simple de ganadores (16), ya que no guardamos los perdedores
+  const r32Col = document.createElement('div'); r32Col.className='b-col';
+  const r32Header=document.createElement('div'); r32Header.className='b-col-header'; r32Header.textContent='Ronda 32 (ganadors)'; r32Col.appendChild(r32Header);
+  for(let i=0;i<R32_MATCH_ORDER.length;i+=2){
+    const t1 = r32ByMatch[R32_MATCH_ORDER[i]];
+    const t2 = r32ByMatch[R32_MATCH_ORDER[i+1]];
+    r32Col.appendChild(makeMatchBox(t1, t2, null));
+  }
+
+  const octCol = makeCol('Octavos', OCT_IDS.reduce((acc,mid,i)=>{
+    if(i%2===0) acc.push([octByMatch[mid], octByMatch[OCT_IDS[i+1]], null]);
+    return acc;
+  },[]));
+
+  const qfCol = makeCol('Cuartos', QF_IDS.reduce((acc,mid,i)=>{
+    if(i%2===0) acc.push([qfByMatch[mid], qfByMatch[QF_IDS[i+1]], null]);
+    return acc;
+  },[]));
+
+  const sfCol = makeCol('Semifinal', [[sfResults[0]?sfResults[0][2]:null, sfResults[1]?sfResults[1][2]:null, champ]]);
+
+  if(r32List.length || Object.values(r32ByMatch).some(Boolean)) tree.appendChild(r32Col);
+  if(Object.values(octByMatch).some(Boolean)) tree.appendChild(octCol);
+  if(Object.values(qfByMatch).some(Boolean)) tree.appendChild(qfCol);
+  if(sfResults.some(r=>r[2])) tree.appendChild(sfCol);
 
   // Campeon
   const champCol=document.createElement('div');
@@ -244,7 +331,7 @@ function renderBracketReadOnly(tree, bet){
   champCol.appendChild(champBox);
   tree.appendChild(champCol);
 
-  if(!r32.filter(Boolean).length && !champ){
+  if(!r32List.length && !champ){
     tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico">📭</div>Aquest participant encara no ha completat el bracket</div>';
   }
 }
