@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ Mundiporra 2026 — Apostes de tothom</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1a202c;font-size:14px;padding:16px;min-height:100vh}
+h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
+.subtitle{text-align:center;color:#718096;font-size:13px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.selector-row{display:flex;gap:10px;align-items:center;margin-bottom:4px}
+.selector-row select{flex:1;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#1a202c;font-size:14px;font-family:inherit}
+.selector-row select:focus{outline:none;border-color:#1d9e75}
+.status{font-size:12px;color:#718096;margin-top:8px;text-align:center}
+.status.err{color:#c53030}
+
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.group-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.group-header{background:#1d9e75;color:#fff;padding:6px 10px;font-size:12px;font-weight:600}
+.team-item{display:flex;align-items:center;gap:6px;padding:6px 9px;border-bottom:1px solid #f0f4f8}
+.team-item:last-child{border-bottom:none}
+.pos-badge{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0}
+.pos-badge.p1{background:#f5c842;color:#7a5c00}
+.pos-badge.p2{background:#b0bec5;color:#37474f}
+.pos-badge.p3{background:#e2e8f0;color:#718096}
+.pos-badge.p4{background:#e2e8f0;color:#a0aec0;opacity:.7}
+.tf{font-size:15px;flex-shrink:0}.tn{flex:1;font-size:11px;font-weight:500}
+
+.section-title{font-size:11px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+.bracket-scroll{overflow-x:auto;padding:4px 0 8px}
+.bracket-tree{display:flex;align-items:stretch;gap:0;min-width:1050px;position:relative}
+.b-col{display:flex;flex-direction:column;justify-content:space-around;padding:0 3px;flex:1;min-width:100px}
+.b-col-header{text-align:center;font-size:9px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.4px;padding:4px 0 6px;border-bottom:2px solid #e2e8f0;margin-bottom:6px}
+.b-match{display:flex;flex-direction:column;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin:3px 0}
+.b-team{display:flex;align-items:center;gap:4px;padding:4px 7px;font-size:10px;min-height:24px}
+.b-team.winner{background:#f0fdf4;color:#276749;font-weight:600}
+.b-team.tbd{color:#a0aec0;font-style:italic}
+.b-flag{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.b-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-sep{height:1px;background:#e2e8f0}
+
+.champ-trophy{text-align:center;border:2px solid #f5c842;border-radius:12px;padding:10px 8px;background:#fffde7;min-width:100px}
+.champ-trophy h3{font-size:10px;font-weight:700;color:#7a5c00;text-transform:uppercase;margin-bottom:6px}
+.champ-team{display:flex;align-items:center;gap:5px;justify-content:center;font-size:11px;font-weight:700;color:#7a5c00}
+
+.extras-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.extra-box{background:#f7fafc;border-radius:8px;padding:8px 10px}
+.extra-label{font-size:10px;color:#718096;font-weight:600;text-transform:uppercase;margin-bottom:2px}
+.extra-val{font-size:13px;font-weight:600;color:#1a202c}
+
+.empty-state{text-align:center;padding:40px 20px;color:#a0aec0}
+.empty-state .ico{font-size:36px;margin-bottom:10px}
+.loading{text-align:center;padding:40px;color:#718096;font-size:13px}
+</style>
+</head>
+<body>
+
+<h1>⚽ Mundiporra 2026</h1>
+<p class="subtitle">Consulta les apostes de tots els participants</p>
+
+<div class="card">
+  <p class="section-title">Selecciona un participant</p>
+  <div class="selector-row">
+    <select id="participantSelect" onchange="loadParticipant()">
+      <option value="">-- Carregant participants... --</option>
+    </select>
+  </div>
+  <div id="statusMsg" class="status"></div>
+</div>
+
+<div id="content"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_27n09y7kZ8tEvdzNvMzWAlu9PM3qlSChF-ENtnrxJiU9BeJO/exec";
+
+const GROUPS_KEYS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+// Mapa de nombre de equipo -> bandera (para mostrar visualmente)
+const FLAGS = {
+  'México':'🇲🇽','Corea del Sur':'🇰🇷','Sudáfrica':'🇿🇦','Rep. Checa':'🇨🇿',
+  'Canadá':'🇨🇦','Bosnia-Herz.':'🇧🇦','Qatar':'🇶🇦','Suiza':'🇨🇭',
+  'Brasil':'🇧🇷','Marruecos':'🇲🇦','Escocia':'🏴','Haití':'🇭🇹',
+  'EE.UU.':'🇺🇸','Paraguay':'🇵🇾','Australia':'🇦🇺','Turquía':'🇹🇷',
+  'Alemania':'🇩🇪','Ecuador':'🇪🇨','C. de Marfil':'🇨🇮','Curazao':'🇨🇼',
+  'Países Bajos':'🇳🇱','Japón':'🇯🇵','Suecia':'🇸🇪','Túnez':'🇹🇳',
+  'Bélgica':'🇧🇪','Irán':'🇮🇷','Egipto':'🇪🇬','Nueva Zelanda':'🇳🇿',
+  'España':'🇪🇸','Uruguay':'🇺🇾','Arabia Saudita':'🇸🇦','Cabo Verde':'🇨🇻',
+  'Francia':'🇫🇷','Senegal':'🇸🇳','Noruega':'🇳🇴','Irak':'🇮🇶',
+  'Argentina':'🇦🇷','Austria':'🇦🇹','Argelia':'🇩🇿','Jordania':'🇯🇴',
+  'Portugal':'🇵🇹','Colombia':'🇨🇴','R.D. Congo':'🇨🇩','Uzbekistán':'🇺🇿',
+  'Inglaterra':'🏴','Croacia':'🇭🇷','Panamá':'🇵🇦','Ghana':'🇬🇭'
+};
+function flagFor(name){ return FLAGS[name] || '🏳️'; }
+
+let allBets = [];
+
+function jsonpCall(url, cbName, timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const old=document.getElementById('sc_'+cbName); if(old) old.remove();
+    const timer=setTimeout(()=>{cleanup();reject(new Error('Timeout'));},timeout);
+    function cleanup(){clearTimeout(timer);const s=document.getElementById('sc_'+cbName);if(s)s.remove();delete window[cbName];}
+    window[cbName]=(data)=>{cleanup();resolve(data);};
+    const script=document.createElement('script');
+    script.id='sc_'+cbName;
+    script.src=url+'&callback='+cbName;
+    script.onerror=()=>{cleanup();reject(new Error('Error de red'));};
+    document.head.appendChild(script);
+  });
+}
+
+async function loadAllBets(){
+  const sel=document.getElementById('participantSelect');
+  const status=document.getElementById('statusMsg');
+  try{
+    const data = await jsonpCall(SCRIPT_URL+'?action=getAll','cb_loadall');
+    if(!data.ok){ status.className='status err'; status.textContent='Error: '+data.error; return; }
+    allBets = (data.bets||[]).filter(b=>b.nombre);
+    sel.innerHTML = '<option value="">-- Tria un participant --</option>' +
+      allBets.map((b,i)=>`<option value="${i}">${escapeHtml(b.nombre)}</option>`).join('');
+    status.textContent = allBets.length + ' participants carregats';
+  }catch(e){
+    status.className='status err';
+    status.textContent = 'No es va poder connectar: ' + e.message;
+    sel.innerHTML = '<option value="">-- Error de connexió --</option>';
+  }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function loadParticipant(){
+  const sel=document.getElementById('participantSelect');
+  const idx=sel.value;
+  const content=document.getElementById('content');
+  if(idx===''){ content.innerHTML=''; return; }
+  const bet = allBets[idx];
+  renderBet(bet);
+}
+
+function renderBet(bet){
+  const content=document.getElementById('content');
+  content.innerHTML = '';
+
+  // ── GRUPOS ──
+  const groupsCard=document.createElement('div');
+  groupsCard.className='card';
+  groupsCard.innerHTML='<p class="section-title">📋 Fase de grups</p>';
+  const groupsGrid=document.createElement('div');
+  groupsGrid.className='groups-grid';
+  GROUPS_KEYS.forEach(g=>{
+    const teams=[1,2,3,4].map(p=>bet['G'+g+'_'+p]).filter(Boolean);
+    if(teams.length===0) return;
+    const gc=document.createElement('div');
+    gc.className='group-card';
+    gc.innerHTML=`<div class="group-header">Grup ${g}</div>`;
+    teams.forEach((t,i)=>{
+      const pc=['p1','p2','p3','p4'][i], pl=['1r','2n','3r','4t'][i];
+      gc.innerHTML+=`<div class="team-item"><div class="pos-badge ${pc}">${pl}</div><span class="tf">${flagFor(t)}</span><span class="tn">${t}</span></div>`;
+    });
+    groupsGrid.appendChild(gc);
+  });
+  groupsCard.appendChild(groupsGrid);
+  content.appendChild(groupsCard);
+
+  // ── BRACKET ──
+  const bracketCard=document.createElement('div');
+  bracketCard.className='card';
+  bracketCard.innerHTML='<p class="section-title">🏆 Eliminatòries</p>';
+  const scrollWrap=document.createElement('div');
+  scrollWrap.className='bracket-scroll';
+  const tree=document.createElement('div');
+  tree.className='bracket-tree';
+  scrollWrap.appendChild(tree);
+  bracketCard.appendChild(scrollWrap);
+  content.appendChild(bracketCard);
+
+  renderBracketReadOnly(tree, bet);
+
+  // ── EXTRAS ──
+  const extrasCard=document.createElement('div');
+  extrasCard.className='card';
+  extrasCard.innerHTML='<p class="section-title">🌟 Apostes especials</p>';
+  const grid=document.createElement('div');
+  grid.className='extras-grid';
+  const extras=[
+    ['Equip golejador', bet.goleador],
+    ['Equip revelació', bet.revelacion],
+    ['Pichichi', bet.pichichi],
+    ['Pachocho', bet.pachocho]
+  ];
+  extras.forEach(([label,val])=>{
+    grid.innerHTML+=`<div class="extra-box"><div class="extra-label">${label}</div><div class="extra-val">${val||'—'}</div></div>`;
+  });
+  extrasCard.appendChild(grid);
+  content.appendChild(extrasCard);
+}
+
+// ── BRACKET READ-ONLY usando los datos guardados de la apuesta ──
+function renderBracketReadOnly(tree, bet){
+  const r32 = (bet.r32_winners||'').split('|');
+  const oct = (bet.oct_winners||'').split('|');
+  const qf  = (bet.qf_winners||'').split('|');
+  const sf  = (bet.sf_winners||'').split('|');
+  const champ = bet.campeon || bet.final_winner || '';
+
+  function makeCol(title, teams){
+    const col=document.createElement('div'); col.className='b-col';
+    const h=document.createElement('div'); h.className='b-col-header'; h.textContent=title; col.appendChild(h);
+    // Agrupar de 2 en 2 como partidos
+    for(let i=0;i<teams.length;i+=2){
+      const t1=teams[i], t2=teams[i+1];
+      const match=document.createElement('div'); match.className='b-match';
+      [t1,t2].forEach((t,idx)=>{
+        if(idx===1){ const sep=document.createElement('div'); sep.className='b-sep'; match.appendChild(sep); }
+        const row=document.createElement('div');
+        const isW = t && champ && false; // no marcamos ganador aqui, solo mostramos progresion
+        row.className='b-team'+(t?'':' tbd');
+        row.innerHTML = t ? `<span class="b-flag">${flagFor(t)}</span><span class="b-name">${t}</span>` : `<span class="b-name">—</span>`;
+        match.appendChild(row);
+      });
+      col.appendChild(match);
+    }
+    return col;
+  }
+
+  if(r32.filter(Boolean).length) tree.appendChild(makeCol('Ronda 32', r32));
+  if(oct.filter(Boolean).length) tree.appendChild(makeCol('Octavos', oct));
+  if(qf.filter(Boolean).length)  tree.appendChild(makeCol('Cuartos', qf));
+  if(sf.filter(Boolean).length)  tree.appendChild(makeCol('Semifinal', sf));
+
+  // Campeon
+  const champCol=document.createElement('div');
+  champCol.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;padding:0 8px';
+  const champTitle=document.createElement('div'); champTitle.className='b-col-header'; champTitle.textContent='Campió'; champCol.appendChild(champTitle);
+  const champBox=document.createElement('div'); champBox.className='champ-trophy';
+  champBox.innerHTML='<h3>🏆</h3>';
+  if(champ){
+    champBox.innerHTML+=`<div class="champ-team"><span style="font-size:18px">${flagFor(champ)}</span>${champ}</div>`;
+  } else {
+    champBox.innerHTML+='<div style="font-size:11px;color:#a0aec0;font-style:italic">—</div>';
+  }
+  champCol.appendChild(champBox);
+  tree.appendChild(champCol);
+
+  if(!r32.filter(Boolean).length && !champ){
+    tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico">📭</div>Aquest participant encara no ha completat el bracket</div>';
+  }
+}
+
+loadAllBets();
+</script>
+</body>
+</html>
