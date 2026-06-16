@@ -30,21 +30,25 @@ h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
 
 .section-title{font-size:11px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
 
-.bracket-scroll{overflow-x:auto;padding:4px 0 8px}
-.bracket-tree{display:flex;align-items:stretch;gap:0;min-width:1050px;position:relative}
-.b-col{display:flex;flex-direction:column;justify-content:space-around;padding:0 3px;flex:1;min-width:100px}
-.b-col-header{text-align:center;font-size:9px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.4px;padding:4px 0 6px;border-bottom:2px solid #e2e8f0;margin-bottom:6px}
-.b-match{display:flex;flex-direction:column;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin:3px 0}
-.b-team{display:flex;align-items:center;gap:4px;padding:4px 7px;font-size:10px;min-height:24px}
-.b-team.winner{background:#f0fdf4;color:#276749;font-weight:600}
-.b-team.tbd{color:#a0aec0;font-style:italic}
-.b-flag{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+/* ── BRACKET — misma estructura visual que el formulario ── */
+.bracket-scroll{overflow-x:auto;padding:8px 0 16px}
+.bracket-tree{display:flex;align-items:stretch;gap:0;min-width:1100px;position:relative}
+.b-col{display:flex;flex-direction:column;justify-content:space-around;padding:0 4px;flex:1;min-width:105px;position:relative}
+.b-col-header{text-align:center;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;padding:4px 0 8px;border-bottom:2px solid #e2e8f0;margin-bottom:8px}
+.b-match{display:flex;flex-direction:column;margin:3px 0;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;background:#fff}
+.b-team{display:flex;align-items:center;gap:5px;padding:5px 8px;font-size:11px;min-height:28px}
+.b-team.winner{background:#f0fdf4;border-color:#68d391;color:#276749;font-weight:600}
+.b-team.tbd{color:#a0aec0;font-style:italic;background:#fafafa}
+.b-flag{font-size:14px;flex-shrink:0;width:18px;text-align:center}
 .b-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .b-sep{height:1px;background:#e2e8f0}
 
-.champ-trophy{text-align:center;border:2px solid #f5c842;border-radius:12px;padding:10px 8px;background:#fffde7;min-width:100px}
-.champ-trophy h3{font-size:10px;font-weight:700;color:#7a5c00;text-transform:uppercase;margin-bottom:6px}
-.champ-team{display:flex;align-items:center;gap:5px;justify-content:center;font-size:11px;font-weight:700;color:#7a5c00}
+.b-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:130px;padding:0 8px}
+.champ-trophy{text-align:center;border:2px solid #f5c842;border-radius:14px;padding:12px 10px;background:#fffde7;box-shadow:0 2px 12px rgba(245,200,66,.3);min-width:110px}
+.champ-trophy h3{font-size:11px;font-weight:700;color:#7a5c00;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.champ-team{display:flex;align-items:center;gap:5px;padding:6px 8px;border-radius:7px;font-size:12px;justify-content:center}
+.champ-team.selected{background:#fef9c3;font-weight:700;color:#7a5c00}
+.champ-empty{font-size:11px;color:#a0aec0;font-style:italic;text-align:center;padding:8px 0}
 
 .extras-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .extra-box{background:#f7fafc;border-radius:8px;padding:8px 10px}
@@ -53,7 +57,6 @@ h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
 
 .empty-state{text-align:center;padding:40px 20px;color:#a0aec0}
 .empty-state .ico{font-size:36px;margin-bottom:10px}
-.loading{text-align:center;padding:40px;color:#718096;font-size:13px}
 </style>
 </head>
 <body>
@@ -78,7 +81,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_2
 
 const GROUPS_KEYS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
-// Mapa de nombre de equipo -> bandera (para mostrar visualmente)
 const FLAGS = {
   'México':'🇲🇽','Corea del Sur':'🇰🇷','Sudáfrica':'🇿🇦','Rep. Checa':'🇨🇿',
   'Canadá':'🇨🇦','Bosnia-Herz.':'🇧🇦','Qatar':'🇶🇦','Suiza':'🇨🇭',
@@ -135,8 +137,7 @@ function loadParticipant(){
   const idx=sel.value;
   const content=document.getElementById('content');
   if(idx===''){ content.innerHTML=''; return; }
-  const bet = allBets[idx];
-  renderBet(bet);
+  renderBet(allBets[idx]);
 }
 
 function renderBet(bet){
@@ -164,10 +165,11 @@ function renderBet(bet){
   groupsCard.appendChild(groupsGrid);
   content.appendChild(groupsCard);
 
-  // ── BRACKET ──
+  // ── BRACKET (misma estructura visual que el formulario) ──
   const bracketCard=document.createElement('div');
   bracketCard.className='card';
-  bracketCard.innerHTML='<p class="section-title">🏆 Eliminatòries</p>';
+  bracketCard.style.padding='12px';
+  bracketCard.innerHTML='<p class="section-title" style="margin-left:8px">🏆 Eliminatòries</p>';
   const scrollWrap=document.createElement('div');
   scrollWrap.className='bracket-scroll';
   const tree=document.createElement('div');
@@ -176,7 +178,7 @@ function renderBet(bet){
   bracketCard.appendChild(scrollWrap);
   content.appendChild(bracketCard);
 
-  renderBracketReadOnly(tree, bet);
+  buildAndRenderBracket(tree, bet);
 
   // ── EXTRAS ──
   const extrasCard=document.createElement('div');
@@ -197,140 +199,185 @@ function renderBet(bet){
   content.appendChild(extrasCard);
 }
 
-// ── BRACKET READ-ONLY — reconstruye el arbol oficial FIFA usando los
-// equipos guardados en cada ronda, en el ORDEN OFICIAL de los cruces ──
+// ════════════════════════════════════════════════════════════
+// RECONSTRUCCION DEL BRACKET OFICIAL — misma logica que el formulario,
+// pero usando los datos YA GUARDADOS de la apuesta en vez de clicks en vivo
+// ════════════════════════════════════════════════════════════
 
-// Orden oficial de partidos de Ronda 32 (igual que en el formulario)
-const R32_MATCH_ORDER = ['m74','m77','m73','m75','m83','m84','m81','m82','m76','m78','m79','m80','m86','m88','m85','m87'];
-// Octavos: cada partido cruza dos resultados de R32 en este orden
-const OCT_CROSSES = [['m74','m77'],['m73','m75'],['m76','m78'],['m79','m80'],['m83','m84'],['m81','m82'],['m86','m88'],['m85','m87']];
-// Cuartos: cruces de octavos
-const QF_CROSSES = [['m89','m90'],['m93','m94'],['m91','m92'],['m95','m96']];
-// IDs de octavos para mapear con QF_CROSSES
-const OCT_IDS = ['m89','m90','m91','m92','m93','m94','m95','m96'];
-// Semis: cruces de cuartos
-const SF_CROSSES = [['m97','m98'],['m99','m100']];
-const QF_IDS = ['m97','m98','m99','m100'];
+// Mismo orden oficial FIFA de partidos de Ronda 32 que en el formulario
+const R32_ORDER = ['m74','m77','m73','m75','m83','m84','m81','m82','m76','m78','m79','m80','m86','m88','m85','m87'];
+// Cruces de Octavos (mismos que el formulario): cada uno cruza 2 partidos de R32
+const OCT_DEFS = [
+  {id:'m89', from:['m74','m77']}, {id:'m90', from:['m73','m75']},
+  {id:'m91', from:['m76','m78']}, {id:'m92', from:['m79','m80']},
+  {id:'m93', from:['m83','m84']}, {id:'m94', from:['m81','m82']},
+  {id:'m95', from:['m86','m88']}, {id:'m96', from:['m85','m87']},
+];
+// Cruces de Cuartos
+const QF_DEFS = [
+  {id:'m97',  from:['m89','m90']}, {id:'m98',  from:['m93','m94']},
+  {id:'m99',  from:['m91','m92']}, {id:'m100', from:['m95','m96']},
+];
+// Cruces de Semis
+const SF_DEFS = [
+  {id:'m101', from:['m97','m98']}, {id:'m102', from:['m99','m100']},
+];
 
-function renderBracketReadOnly(tree, bet){
-  // 1. Asignar equipos de R32 a sus IDs de partido en el orden oficial
+function buildAndRenderBracket(tree, bet){
+  // 1. Asignar cada equipo de r32_winners a su ID de partido oficial
   const r32List = (bet.r32_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  const r32ByMatch = {};
-  R32_MATCH_ORDER.forEach((mid,i)=>{ r32ByMatch[mid] = r32List[i] || null; });
+  const winnerOf = {}; // mid -> nombre del equipo ganador de ese partido
+  R32_ORDER.forEach((mid,i)=>{ winnerOf[mid] = r32List[i] || null; });
 
-  // 2. Octavos: usamos los equipos guardados en oct_winners, pero les asignamos
-  //    su posicion segun que partido de R32 ganaron (buscamos coincidencia)
-  const octList = (bet.oct_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  // Cada equipo de octavos viene de uno de los dos partidos de R32 que cruzan en ese octavo.
-  // Como no sabemos el orden exacto en que se guardo octavos, lo deducimos:
-  // recorremos los cruces oficiales y vemos cual de los dos equipos de R32 esta en octList
-  const octByMatch = {};
-  OCT_CROSSES.forEach(([midA, midB], idx)=>{
-    const ocId = OCT_IDS[idx];
-    const teamA = r32ByMatch[midA];
-    const teamB = r32ByMatch[midB];
-    // Buscamos cual de los dos paso (esta en octList) y lo quitamos de la lista para no reusarlo
+  // 2. Para cada cruce de Octavos, deducir cual de los 2 posibles paso
+  //    comparando con oct_winners (la lista de los que SI pasaron)
+  let octPool = (bet.oct_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  OCT_DEFS.forEach(def=>{
+    const candA = winnerOf[def.from[0]];
+    const candB = winnerOf[def.from[1]];
     let winner = null;
-    if(teamA && octList.includes(teamA)){ winner = teamA; octList.splice(octList.indexOf(teamA),1); }
-    else if(teamB && octList.includes(teamB)){ winner = teamB; octList.splice(octList.indexOf(teamB),1); }
-    octByMatch[ocId] = winner;
+    if(candA && octPool.includes(candA)){ winner=candA; octPool.splice(octPool.indexOf(candA),1); }
+    else if(candB && octPool.includes(candB)){ winner=candB; octPool.splice(octPool.indexOf(candB),1); }
+    winnerOf[def.id] = winner;
   });
 
-  // 3. Cuartos: mismo proceso, cruzando los resultados de octavos
-  const qfList = (bet.qf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  const qfByMatch = {};
-  QF_CROSSES.forEach(([midA, midB], idx)=>{
-    const qfId = QF_IDS[idx];
-    const teamA = octByMatch[midA];
-    const teamB = octByMatch[midB];
+  // 3. Cuartos
+  let qfPool = (bet.qf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  QF_DEFS.forEach(def=>{
+    const candA = winnerOf[def.from[0]];
+    const candB = winnerOf[def.from[1]];
     let winner = null;
-    if(teamA && qfList.includes(teamA)){ winner = teamA; qfList.splice(qfList.indexOf(teamA),1); }
-    else if(teamB && qfList.includes(teamB)){ winner = teamB; qfList.splice(qfList.indexOf(teamB),1); }
-    qfByMatch[qfId] = winner;
+    if(candA && qfPool.includes(candA)){ winner=candA; qfPool.splice(qfPool.indexOf(candA),1); }
+    else if(candB && qfPool.includes(candB)){ winner=candB; qfPool.splice(qfPool.indexOf(candB),1); }
+    winnerOf[def.id] = winner;
   });
 
-  // 4. Semis: cruzando resultados de cuartos
-  const sfList = (bet.sf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  const sfResults = []; // [ [teamA, teamB, winner], ... ]
-  SF_CROSSES.forEach(([midA, midB])=>{
-    const teamA = qfByMatch[midA];
-    const teamB = qfByMatch[midB];
+  // 4. Semis
+  let sfPool = (bet.sf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+  SF_DEFS.forEach(def=>{
+    const candA = winnerOf[def.from[0]];
+    const candB = winnerOf[def.from[1]];
     let winner = null;
-    if(teamA && sfList.includes(teamA)){ winner = teamA; sfList.splice(sfList.indexOf(teamA),1); }
-    else if(teamB && sfList.includes(teamB)){ winner = teamB; sfList.splice(sfList.indexOf(teamB),1); }
-    sfResults.push([teamA, teamB, winner]);
+    if(candA && sfPool.includes(candA)){ winner=candA; sfPool.splice(sfPool.indexOf(candA),1); }
+    else if(candB && sfPool.includes(candB)){ winner=candB; sfPool.splice(sfPool.indexOf(candB),1); }
+    winnerOf[def.id] = winner;
   });
 
   const champ = bet.campeon || bet.final_winner || '';
 
-  // ── RENDER ──
-  function makeMatchBox(teamA, teamB, winner){
-    const match=document.createElement('div'); match.className='b-match';
-    [teamA, teamB].forEach((t,idx)=>{
-      if(idx===1){ const sep=document.createElement('div'); sep.className='b-sep'; match.appendChild(sep); }
-      const row=document.createElement('div');
-      const isW = t && winner && t===winner;
-      row.className='b-team'+(isW?' winner':'')+(t?'':' tbd');
-      row.innerHTML = t ? `<span class="b-flag">${flagFor(t)}</span><span class="b-name">${t}</span>` : `<span class="b-name">—</span>`;
-      match.appendChild(row);
-    });
-    return match;
+  // ── Helpers para construir las cajas visuales (misma estructura que el formulario) ──
+  function teamRow(name, isWinner){
+    const row=document.createElement('div');
+    row.className='b-team'+(isWinner?' winner':'')+(name?'':' tbd');
+    row.innerHTML = name ? `<span class="b-flag">${flagFor(name)}</span><span class="b-name">${name}</span>` : `<span class="b-name">—</span>`;
+    return row;
   }
 
-  function makeCol(title, matchesData){
+  // Para Ronda 32 no tenemos los 2 equipos originales del partido (solo el ganador),
+  // asi que mostramos el ganador junto a un marcador generico de "rival"
+  function r32MatchBox(mid){
+    const wrap=document.createElement('div'); wrap.className='b-match';
+    const winner = winnerOf[mid];
+    wrap.appendChild(teamRow(winner, true));
+    const sep=document.createElement('div'); sep.className='b-sep'; wrap.appendChild(sep);
+    wrap.appendChild(teamRow(null, false));
+    return wrap;
+  }
+
+  function matchBox(defId, fromIds){
+    const wrap=document.createElement('div'); wrap.className='b-match';
+    const a = winnerOf[fromIds[0]];
+    const b = winnerOf[fromIds[1]];
+    const winner = winnerOf[defId];
+    wrap.appendChild(teamRow(a, winner && a===winner));
+    const sep=document.createElement('div'); sep.className='b-sep'; wrap.appendChild(sep);
+    wrap.appendChild(teamRow(b, winner && b===winner));
+    return wrap;
+  }
+
+  function makeCol(label, boxes){
     const col=document.createElement('div'); col.className='b-col';
-    const h=document.createElement('div'); h.className='b-col-header'; h.textContent=title; col.appendChild(h);
-    matchesData.forEach(([a,b,w])=>{ col.appendChild(makeMatchBox(a,b,w)); });
+    const h=document.createElement('div'); h.className='b-col-header'; h.textContent=label; col.appendChild(h);
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;flex:1;justify-content:space-around;gap:4px';
+    boxes.forEach(b=>wrap.appendChild(b));
+    col.appendChild(wrap);
     return col;
   }
 
-  // Ronda 32: pares consecutivos segun R32_MATCH_ORDER (8 partidos, cada uno ya es un cruce real)
-  const r32Matches = [];
-  for(let i=0;i<R32_MATCH_ORDER.length;i+=2){
-    // En realidad cada mid de R32_MATCH_ORDER YA es un partido individual (no un par)
-    // r32ByMatch[mid] es el GANADOR de ese partido, no tenemos los dos equipos originales
-    // Por eso mostramos solo el ganador como resultado de cada partido de Ronda 32
-  }
-  // Mostramos Ronda 32 como lista simple de ganadores (16), ya que no guardamos los perdedores
-  const r32Col = document.createElement('div'); r32Col.className='b-col';
-  const r32Header=document.createElement('div'); r32Header.className='b-col-header'; r32Header.textContent='Ronda 32 (ganadors)'; r32Col.appendChild(r32Header);
-  for(let i=0;i<R32_MATCH_ORDER.length;i+=2){
-    const t1 = r32ByMatch[R32_MATCH_ORDER[i]];
-    const t2 = r32ByMatch[R32_MATCH_ORDER[i+1]];
-    r32Col.appendChild(makeMatchBox(t1, t2, null));
-  }
+  // ── Construir mitad izquierda ──
+  const leftHalf=document.createElement('div');
+  leftHalf.style.cssText='display:flex;flex:1;align-items:stretch';
 
-  const octCol = makeCol('Octavos', OCT_IDS.reduce((acc,mid,i)=>{
-    if(i%2===0) acc.push([octByMatch[mid], octByMatch[OCT_IDS[i+1]], null]);
-    return acc;
-  },[]));
+  const leftR32Ids = ['m74','m77','m73','m75','m83','m84','m81','m82'];
+  leftHalf.appendChild(makeCol('Ronda 32', leftR32Ids.map(r32MatchBox)));
 
-  const qfCol = makeCol('Cuartos', QF_IDS.reduce((acc,mid,i)=>{
-    if(i%2===0) acc.push([qfByMatch[mid], qfByMatch[QF_IDS[i+1]], null]);
-    return acc;
-  },[]));
+  leftHalf.appendChild(makeCol('Octavos', [
+    matchBox('m89',['m74','m77']), matchBox('m90',['m73','m75']),
+    matchBox('m93',['m83','m84']), matchBox('m94',['m81','m82'])
+  ]));
 
-  const sfCol = makeCol('Semifinal', [[sfResults[0]?sfResults[0][2]:null, sfResults[1]?sfResults[1][2]:null, champ]]);
+  leftHalf.appendChild(makeCol('Cuartos', [
+    matchBox('m97',['m89','m90']), matchBox('m98',['m93','m94'])
+  ]));
 
-  if(r32List.length || Object.values(r32ByMatch).some(Boolean)) tree.appendChild(r32Col);
-  if(Object.values(octByMatch).some(Boolean)) tree.appendChild(octCol);
-  if(Object.values(qfByMatch).some(Boolean)) tree.appendChild(qfCol);
-  if(sfResults.some(r=>r[2])) tree.appendChild(sfCol);
+  leftHalf.appendChild(makeCol('Semifinal', [
+    matchBox('m101',['m97','m98'])
+  ]));
 
-  // Campeon
-  const champCol=document.createElement('div');
-  champCol.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;padding:0 8px';
-  const champTitle=document.createElement('div'); champTitle.className='b-col-header'; champTitle.textContent='Campió'; champCol.appendChild(champTitle);
-  const champBox=document.createElement('div'); champBox.className='champ-trophy';
-  champBox.innerHTML='<h3>🏆</h3>';
+  tree.appendChild(leftHalf);
+
+  // ── Centro: Final + Campeón ──
+  const center=document.createElement('div');
+  center.className='b-center';
+
+  const finalLabel=document.createElement('div');
+  finalLabel.className='b-col-header';
+  finalLabel.style.marginBottom='8px';
+  finalLabel.textContent='Final';
+  center.appendChild(finalLabel);
+
+  const finalBox = matchBox('m104',['m101','m102']);
+  finalBox.style.marginBottom='12px';
+  center.appendChild(finalBox);
+
+  const champBox=document.createElement('div');
+  champBox.className='champ-trophy';
+  champBox.innerHTML='<h3>🏆 Campeón</h3>';
   if(champ){
-    champBox.innerHTML+=`<div class="champ-team"><span style="font-size:18px">${flagFor(champ)}</span>${champ}</div>`;
+    const row=document.createElement('div');
+    row.className='champ-team selected';
+    row.innerHTML=`<span style="font-size:20px">${flagFor(champ)}</span><span style="font-size:13px;flex:1;font-weight:700">${champ}</span><span>🏆</span>`;
+    champBox.appendChild(row);
   } else {
-    champBox.innerHTML+='<div style="font-size:11px;color:#a0aec0;font-style:italic">—</div>';
+    champBox.innerHTML+='<div class="champ-empty">Sense campió triat</div>';
   }
-  champCol.appendChild(champBox);
-  tree.appendChild(champCol);
+  center.appendChild(champBox);
+  tree.appendChild(center);
 
+  // ── Mitad derecha (invertida) ──
+  const rightHalf=document.createElement('div');
+  rightHalf.style.cssText='display:flex;flex:1;align-items:stretch;flex-direction:row-reverse';
+
+  const rightR32Ids = ['m76','m78','m79','m80','m86','m88','m85','m87'];
+  rightHalf.appendChild(makeCol('Ronda 32', rightR32Ids.map(r32MatchBox)));
+
+  rightHalf.appendChild(makeCol('Octavos', [
+    matchBox('m91',['m76','m78']), matchBox('m92',['m79','m80']),
+    matchBox('m95',['m86','m88']), matchBox('m96',['m85','m87'])
+  ]));
+
+  rightHalf.appendChild(makeCol('Cuartos', [
+    matchBox('m99',['m91','m92']), matchBox('m100',['m95','m96'])
+  ]));
+
+  rightHalf.appendChild(makeCol('Semifinal', [
+    matchBox('m102',['m99','m100'])
+  ]));
+
+  tree.appendChild(rightHalf);
+
+  // Si no hay ningun dato, mostrar estado vacio
   if(!r32List.length && !champ){
     tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico">📭</div>Aquest participant encara no ha completat el bracket</div>';
   }
