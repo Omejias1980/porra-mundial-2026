@@ -57,24 +57,66 @@ h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
 
 .empty-state{text-align:center;padding:40px 20px;color:#a0aec0}
 .empty-state .ico{font-size:36px;margin-bottom:10px}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e2e8f0}
+.tab-btn{padding:10px 24px;border:none;background:none;color:#718096;cursor:pointer;font-size:14px;font-family:inherit;font-weight:500;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab-btn.active{color:#1d9e75;border-bottom-color:#1d9e75;font-weight:700}
+.tab-btn:hover:not(.active){color:#4a5568}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* RANKING */
+.ranking-table{width:100%;border-collapse:collapse}
+.ranking-table th{font-size:11px;font-weight:700;color:#fff;background:#1a202c;padding:8px 10px;text-align:left}
+.ranking-table th:last-child{text-align:right}
+.ranking-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8;font-size:13px}
+.ranking-table tr:hover td{background:#f7fafc}
+.ranking-table tr:last-child td{border-bottom:none}
+.rank-pos{font-weight:700;width:36px;text-align:center}
+.rank-pos.gold{color:#b8860b}
+.rank-pos.silver{color:#708090}
+.rank-pos.bronze{color:#a0522d}
+.total-pill{display:inline-block;padding:3px 12px;border-radius:999px;background:#e2e8f0;font-weight:700;font-size:13px;float:right}
+.total-pill.first{background:#fef9c3;color:#7a5c00}
+.total-pill.second{background:#f1f5f9;color:#475569}
+.total-pill.third{background:#fff5f5;color:#a0522d}
+.pts-breakdown{font-size:11px;color:#a0aec0;margin-top:2px}
+.last-update{font-size:11px;color:#a0aec0;text-align:right;margin-top:12px;font-style:italic}
 </style>
 </head>
 <body>
 
 <h1>⚽ Mundiporra 2026</h1>
-<p class="subtitle">Consulta les apostes de tots els participants</p>
+<p class="subtitle">Consulta les apostes i el ranking de tots els participants</p>
 
-<div class="card">
-  <p class="section-title">Selecciona un participant</p>
-  <div class="selector-row">
-    <select id="participantSelect" onchange="loadParticipant()">
-      <option value="">-- Carregant participants... --</option>
-    </select>
-  </div>
-  <div id="statusMsg" class="status"></div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('apostes')">📋 Apostes</button>
+  <button class="tab-btn" onclick="showTab('ranking')">🏆 Ranking</button>
 </div>
 
-<div id="content"></div>
+<!-- PANEL APOSTES -->
+<div id="panel-apostes" class="tab-panel active">
+  <div class="card">
+    <p class="section-title">Selecciona un participant</p>
+    <div class="selector-row">
+      <select id="participantSelect" onchange="loadParticipant()">
+        <option value="">-- Carregant participants... --</option>
+      </select>
+    </div>
+    <div id="statusMsg" class="status"></div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<!-- PANEL RANKING -->
+<div id="panel-ranking" class="tab-panel">
+  <div class="card">
+    <p class="section-title">🏆 Classificació general</p>
+    <div id="rankingContent">
+      <div class="loading" style="text-align:center;padding:30px;color:#718096">Carregant ranking...</div>
+    </div>
+  </div>
+</div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_27n09y7kZ8tEvdzNvMzWAlu9PM3qlSChF-ENtnrxJiU9BeJO/exec";
@@ -418,6 +460,64 @@ function buildAndRenderBracket(tree, bet){
   // Si no hay ningun dato, mostrar estado vacio
   if(!r32List.length && !champ){
     tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico">📭</div>Aquest participant encara no ha completat el bracket</div>';
+  }
+}
+
+function showTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  event.target.classList.add('active');
+  if(tab==='ranking') loadRanking();
+}
+
+async function loadRanking(){
+  const el=document.getElementById('rankingContent');
+  el.innerHTML='<div style="text-align:center;padding:30px;color:#718096">Carregant...</div>';
+  try{
+    const data = await jsonpCall(SCRIPT_URL+'?action=getRanking','cb_ranking');
+    if(!data.ok){ el.innerHTML='<p style="color:#c53030;text-align:center">'+data.error+'</p>'; return; }
+    const rows = data.ranking;
+    if(!rows||rows.length<=1){ el.innerHTML='<p style="color:#a0aec0;text-align:center">Encara no hi ha ranking calculat. L'admin ha d'executar "Calcular ranking" primer.</p>'; return; }
+    const headers = rows[0];
+    const dataRows = rows.slice(1).filter(r=>r[0]&&String(r[0]).match(/^\d+$/));
+
+    let html = '<table class="ranking-table"><thead><tr>';
+    headers.forEach((h,i)=>{
+      if(i<2) html+=`<th>${h}</th>`;
+      else if(String(h).trim()==='#') html+=`<th>#</th>`;
+      else html+=`<th style="text-align:right">${h}</th>`;
+    });
+    html+='</tr></thead><tbody>';
+
+    dataRows.forEach((row,idx)=>{
+      const pos = parseInt(row[0]);
+      const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+      const pillClass = pos===1?'first':pos===2?'second':pos===3?'third':'';
+      html+=`<tr>`;
+      row.forEach((cell,i)=>{
+        if(i===0){
+          const emoji = pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+          html+=`<td class="rank-pos ${posClass}">${emoji}</td>`;
+        } else if(i===row.length-1){
+          html+=`<td><span class="total-pill ${pillClass}">${cell} pts</span></td>`;
+        } else {
+          html+=`<td>${cell||''}</td>`;
+        }
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+
+    // Last update row (last row of sheet data)
+    const lastRow = rows[rows.length-1];
+    if(lastRow && String(lastRow[0]).includes('actualització')){
+      html+=`<p class="last-update">${lastRow[0]}</p>`;
+    }
+
+    el.innerHTML = html;
+  }catch(e){
+    el.innerHTML='<p style="color:#c53030;text-align:center">Error: '+e.message+'</p>';
   }
 }
 
