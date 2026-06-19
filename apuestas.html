@@ -119,25 +119,35 @@ h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1H14K6E4Fb1TXVLLw7_3bX4t4QTfIK5CEDVvYwH3fN5clK3G7K_I5hoLTazeaMeF6/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_27n09y7kZ8tEvdzNvMzWAlu9PM3qlSChF-ENtnrxJiU9BeJO/exec";
 
 const GROUPS_KEYS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
 const FLAGS = {
-  'México':'🇲🇽','Corea del Sur':'🇰🇷','Sudáfrica':'🇿🇦','Rep. Checa':'🇨🇿',
-  'Canadá':'🇨🇦','Bosnia-Herz.':'🇧🇦','Qatar':'🇶🇦','Suiza':'🇨🇭',
-  'Brasil':'🇧🇷','Marruecos':'🇲🇦','Escocia':'🏴','Haití':'🇭🇹',
-  'EE.UU.':'🇺🇸','Paraguay':'🇵🇾','Australia':'🇦🇺','Turquía':'🇹🇷',
-  'Alemania':'🇩🇪','Ecuador':'🇪🇨','C. de Marfil':'🇨🇮','Curazao':'🇨🇼',
-  'Países Bajos':'🇳🇱','Japón':'🇯🇵','Suecia':'🇸🇪','Túnez':'🇹🇳',
-  'Bélgica':'🇧🇪','Irán':'🇮🇷','Egipto':'🇪🇬','Nueva Zelanda':'🇳🇿',
-  'España':'🇪🇸','Uruguay':'🇺🇾','Arabia Saudita':'🇸🇦','Cabo Verde':'🇨🇻',
-  'Francia':'🇫🇷','Senegal':'🇸🇳','Noruega':'🇳🇴','Irak':'🇮🇶',
-  'Argentina':'🇦🇷','Austria':'🇦🇹','Argelia':'🇩🇿','Jordania':'🇯🇴',
-  'Portugal':'🇵🇹','Colombia':'🇨🇴','R.D. Congo':'🇨🇩','Uzbekistán':'🇺🇿',
-  'Inglaterra':'🏴','Croacia':'🇭🇷','Panamá':'🇵🇦','Ghana':'🇬🇭'
+  "Mexico":"MX","Corea del Sur":"KR","Sudafrica":"ZA","Rep. Checa":"CZ",
+  "Canada":"CA","Bosnia-Herz.":"BA","Qatar":"QA","Suiza":"CH",
+  "Brasil":"BR","Marruecos":"MA","Escocia":"GB-SCT","Haiti":"HT",
+  "EE.UU.":"US","Paraguay":"PY","Australia":"AU","Turquia":"TR",
+  "Alemania":"DE","Ecuador":"EC","C. de Marfil":"CI","Curazao":"CW",
+  "Paises Bajos":"NL","Japon":"JP","Suecia":"SE","Tunez":"TN",
+  "Belgica":"BE","Iran":"IR","Egipto":"EG","Nueva Zelanda":"NZ",
+  "Espana":"ES","Uruguay":"UY","Arabia Saudita":"SA","Cabo Verde":"CV",
+  "Francia":"FR","Senegal":"SN","Noruega":"NO","Irak":"IQ",
+  "Argentina":"AR","Austria":"AT","Argelia":"DZ","Jordania":"JO",
+  "Portugal":"PT","Colombia":"CO","R.D. Congo":"CD","Uzbekistan":"UZ",
+  "Inglaterra":"GB-ENG","Croacia":"HR","Panama":"PA","Ghana":"GH"
 };
-function flagFor(name){ return FLAGS[name] || '🏳️'; }
+function normName(s){
+  return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+}
+function flagFor(name){
+  var n = normName(name);
+  var keys = Object.keys(FLAGS);
+  for(var i=0;i<keys.length;i++){
+    if(normName(keys[i])===n) return "";
+  }
+  return "";
+}
 
 let allBets = [];
 
@@ -186,10 +196,10 @@ function renderBet(bet){
   const content=document.getElementById('content');
   content.innerHTML = '';
 
-  // ── GRUPOS ──
+  // -- GRUPOS --
   const groupsCard=document.createElement('div');
   groupsCard.className='card';
-  groupsCard.innerHTML='<p class="section-title">📋 Fase de grups</p>';
+  groupsCard.innerHTML='<p class="section-title"> Fase de grups</p>';
   const groupsGrid=document.createElement('div');
   groupsGrid.className='groups-grid';
   GROUPS_KEYS.forEach(g=>{
@@ -207,11 +217,11 @@ function renderBet(bet){
   groupsCard.appendChild(groupsGrid);
   content.appendChild(groupsCard);
 
-  // ── BRACKET (misma estructura visual que el formulario) ──
+  // -- BRACKET (misma estructura visual que el formulario) --
   const bracketCard=document.createElement('div');
   bracketCard.className='card';
   bracketCard.style.padding='12px';
-  bracketCard.innerHTML='<p class="section-title" style="margin-left:8px">🏆 Eliminatòries</p>';
+  bracketCard.innerHTML='<p class="section-title" style="margin-left:8px"> Eliminatòries</p>';
   const scrollWrap=document.createElement('div');
   scrollWrap.className='bracket-scroll';
   const tree=document.createElement('div');
@@ -222,10 +232,10 @@ function renderBet(bet){
 
   buildAndRenderBracket(tree, bet);
 
-  // ── EXTRAS ──
+  // -- EXTRAS --
   const extrasCard=document.createElement('div');
   extrasCard.className='card';
-  extrasCard.innerHTML='<p class="section-title">🌟 Apostes especials</p>';
+  extrasCard.innerHTML='<p class="section-title"> Apostes especials</p>';
   const grid=document.createElement('div');
   grid.className='extras-grid';
   const extras=[
@@ -235,16 +245,16 @@ function renderBet(bet){
     ['Pachocho', bet.pachocho]
   ];
   extras.forEach(([label,val])=>{
-    grid.innerHTML+=`<div class="extra-box"><div class="extra-label">${label}</div><div class="extra-val">${val||'—'}</div></div>`;
+    grid.innerHTML+=`<div class="extra-box"><div class="extra-label">${label}</div><div class="extra-val">${val||'-'}</div></div>`;
   });
   extrasCard.appendChild(grid);
   content.appendChild(extrasCard);
 }
 
-// ════════════════════════════════════════════════════════════
-// RECONSTRUCCION DEL BRACKET OFICIAL — misma logica que el formulario,
+// ------------------------------------------------------------
+// RECONSTRUCCION DEL BRACKET OFICIAL - misma logica que el formulario,
 // pero usando los datos YA GUARDADOS de la apuesta en vez de clicks en vivo
-// ════════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 
 // Definicion de origenes de cada partido de Ronda 32 (igual que en el formulario)
 // t:'g' = grupo[pos], t:'3' = indice del array de terceros
@@ -345,11 +355,11 @@ function buildAndRenderBracket(tree, bet){
 
   const champ = bet.campeon || bet.final_winner || '';
 
-  // ── Helpers para construir las cajas visuales (misma estructura que el formulario) ──
+  // -- Helpers para construir las cajas visuales (misma estructura que el formulario) --
   function teamRow(name, isWinner){
     const row=document.createElement('div');
     row.className='b-team'+(isWinner?' winner':'')+(name?'':' tbd');
-    row.innerHTML = name ? `<span class="b-flag">${flagFor(name)}</span><span class="b-name">${name}</span>` : `<span class="b-name">—</span>`;
+    row.innerHTML = name ? `<span class="b-flag">${flagFor(name)}</span><span class="b-name">${name}</span>` : `<span class="b-name">-</span>`;
     return row;
   }
 
@@ -385,7 +395,7 @@ function buildAndRenderBracket(tree, bet){
     return col;
   }
 
-  // ── Construir mitad izquierda ──
+  // -- Construir mitad izquierda --
   const leftHalf=document.createElement('div');
   leftHalf.style.cssText='display:flex;flex:1;align-items:stretch';
 
@@ -407,7 +417,7 @@ function buildAndRenderBracket(tree, bet){
 
   tree.appendChild(leftHalf);
 
-  // ── Centro: Final + Campeón ──
+  // -- Centro: Final + Campeón --
   const center=document.createElement('div');
   center.className='b-center';
 
@@ -423,11 +433,11 @@ function buildAndRenderBracket(tree, bet){
 
   const champBox=document.createElement('div');
   champBox.className='champ-trophy';
-  champBox.innerHTML='<h3>🏆 Campeón</h3>';
+  champBox.innerHTML='<h3> Campeón</h3>';
   if(champ){
     const row=document.createElement('div');
     row.className='champ-team selected';
-    row.innerHTML=`<span style="font-size:20px">${flagFor(champ)}</span><span style="font-size:13px;flex:1;font-weight:700">${champ}</span><span>🏆</span>`;
+    row.innerHTML=`<span style="font-size:20px">${flagFor(champ)}</span><span style="font-size:13px;flex:1;font-weight:700">${champ}</span><span></span>`;
     champBox.appendChild(row);
   } else {
     champBox.innerHTML+='<div class="champ-empty">Sense campió triat</div>';
@@ -435,7 +445,7 @@ function buildAndRenderBracket(tree, bet){
   center.appendChild(champBox);
   tree.appendChild(center);
 
-  // ── Mitad derecha (invertida) ──
+  // -- Mitad derecha (invertida) --
   const rightHalf=document.createElement('div');
   rightHalf.style.cssText='display:flex;flex:1;align-items:stretch;flex-direction:row-reverse';
 
@@ -459,7 +469,7 @@ function buildAndRenderBracket(tree, bet){
 
   // Si no hay ningun dato, mostrar estado vacio
   if(!r32List.length && !champ){
-    tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico">📭</div>Aquest participant encara no ha completat el bracket</div>';
+    tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico"></div>Aquest participant encara no ha completat el bracket</div>';
   }
 }
 
@@ -497,7 +507,7 @@ async function loadRanking(){
       html+=`<tr>`;
       row.forEach((cell,i)=>{
         if(i===0){
-          const emoji = pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+          const emoji = pos===1?'':pos===2?'':pos===3?'':pos;
           html+=`<td class="rank-pos ${posClass}">${emoji}</td>`;
         } else if(i===row.length-1){
           html+=`<td><span class="total-pill ${pillClass}">${cell} pts</span></td>`;
