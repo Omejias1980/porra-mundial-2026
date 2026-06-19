@@ -90,8 +90,8 @@ h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
 <p class="subtitle">Consulta les apostes i el ranking de tots els participants</p>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('apostes')">📋 Apostes</button>
-  <button class="tab-btn" onclick="showTab('ranking')">🏆 Ranking</button>
+  <button class="tab-btn active" onclick="showTab('apostes', this)">📋 Apostes</button>
+  <button class="tab-btn" onclick="showTab('ranking', this)">🏆 Ranking</button>
 </div>
 
 <!-- PANEL APOSTES -->
@@ -463,11 +463,11 @@ function buildAndRenderBracket(tree, bet){
   }
 }
 
-function showTab(tab){
+function showTab(tab, btn){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
-  event.target.classList.add('active');
+  if(btn) btn.classList.add('active');
   if(tab==='ranking') loadRanking();
 }
 
@@ -521,7 +521,7 @@ async function loadRanking(){
   }
 }
 
-loadAllBets();
+document.addEventListener('DOMContentLoaded', function(){ loadAllBets(); });
 </script>
 </body>
 </html>
