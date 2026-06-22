@@ -1,537 +1,406 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚽ Mundiporra 2026 — Apostes de tothom</title>
+<title>Mundiporra 2026</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1a202c;font-size:14px;padding:16px;min-height:100vh}
-h1{font-size:24px;font-weight:700;text-align:center;margin-bottom:4px}
-.subtitle{text-align:center;color:#718096;font-size:13px;margin-bottom:20px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.selector-row{display:flex;gap:10px;align-items:center;margin-bottom:4px}
-.selector-row select{flex:1;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#1a202c;font-size:14px;font-family:inherit}
-.selector-row select:focus{outline:none;border-color:#1d9e75}
-.status{font-size:12px;color:#718096;margin-top:8px;text-align:center}
-.status.err{color:#c53030}
-
-.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
-.group-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
-.group-header{background:#1d9e75;color:#fff;padding:6px 10px;font-size:12px;font-weight:600}
-.team-item{display:flex;align-items:center;gap:6px;padding:6px 9px;border-bottom:1px solid #f0f4f8}
-.team-item:last-child{border-bottom:none}
-.pos-badge{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0}
-.pos-badge.p1{background:#f5c842;color:#7a5c00}
-.pos-badge.p2{background:#b0bec5;color:#37474f}
-.pos-badge.p3{background:#e2e8f0;color:#718096}
-.pos-badge.p4{background:#e2e8f0;color:#a0aec0;opacity:.7}
-.tf{font-size:15px;flex-shrink:0}.tn{flex:1;font-size:11px;font-weight:500}
-
-.section-title{font-size:11px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
-
-/* ── BRACKET — misma estructura visual que el formulario ── */
-.bracket-scroll{overflow-x:auto;padding:8px 0 16px}
-.bracket-tree{display:flex;align-items:stretch;gap:0;min-width:1100px;position:relative}
-.b-col{display:flex;flex-direction:column;justify-content:space-around;padding:0 4px;flex:1;min-width:105px;position:relative}
-.b-col-header{text-align:center;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;padding:4px 0 8px;border-bottom:2px solid #e2e8f0;margin-bottom:8px}
-.b-match{display:flex;flex-direction:column;margin:3px 0;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;background:#fff}
-.b-team{display:flex;align-items:center;gap:5px;padding:5px 8px;font-size:11px;min-height:28px}
-.b-team.winner{background:#f0fdf4;border-color:#68d391;color:#276749;font-weight:600}
-.b-team.tbd{color:#a0aec0;font-style:italic;background:#fafafa}
-.b-flag{font-size:14px;flex-shrink:0;width:18px;text-align:center}
-.b-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.b-sep{height:1px;background:#e2e8f0}
-
-.b-center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:130px;padding:0 8px}
-.champ-trophy{text-align:center;border:2px solid #f5c842;border-radius:14px;padding:12px 10px;background:#fffde7;box-shadow:0 2px 12px rgba(245,200,66,.3);min-width:110px}
-.champ-trophy h3{font-size:11px;font-weight:700;color:#7a5c00;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.champ-team{display:flex;align-items:center;gap:5px;padding:6px 8px;border-radius:7px;font-size:12px;justify-content:center}
-.champ-team.selected{background:#fef9c3;font-weight:700;color:#7a5c00}
-.champ-empty{font-size:11px;color:#a0aec0;font-style:italic;text-align:center;padding:8px 0}
-
-.extras-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.extra-box{background:#f7fafc;border-radius:8px;padding:8px 10px}
-.extra-label{font-size:10px;color:#718096;font-weight:600;text-transform:uppercase;margin-bottom:2px}
-.extra-val{font-size:13px;font-weight:600;color:#1a202c}
-
-.empty-state{text-align:center;padding:40px 20px;color:#a0aec0}
-.empty-state .ico{font-size:36px;margin-bottom:10px}
-
-/* TABS */
-.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e2e8f0}
-.tab-btn{padding:10px 24px;border:none;background:none;color:#718096;cursor:pointer;font-size:14px;font-family:inherit;font-weight:500;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
-.tab-btn.active{color:#1d9e75;border-bottom-color:#1d9e75;font-weight:700}
-.tab-btn:hover:not(.active){color:#4a5568}
-.tab-panel{display:none}.tab-panel.active{display:block}
-
-/* RANKING */
-.ranking-table{width:100%;border-collapse:collapse}
-.ranking-table th{font-size:11px;font-weight:700;color:#fff;background:#1a202c;padding:8px 10px;text-align:left}
-.ranking-table th:last-child{text-align:right}
-.ranking-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8;font-size:13px}
-.ranking-table tr:hover td{background:#f7fafc}
-.ranking-table tr:last-child td{border-bottom:none}
-.rank-pos{font-weight:700;width:36px;text-align:center}
-.rank-pos.gold{color:#b8860b}
-.rank-pos.silver{color:#708090}
-.rank-pos.bronze{color:#a0522d}
-.total-pill{display:inline-block;padding:3px 12px;border-radius:999px;background:#e2e8f0;font-weight:700;font-size:13px;float:right}
-.total-pill.first{background:#fef9c3;color:#7a5c00}
-.total-pill.second{background:#f1f5f9;color:#475569}
-.total-pill.third{background:#fff5f5;color:#a0522d}
-.pts-breakdown{font-size:11px;color:#a0aec0;margin-top:2px}
-.last-update{font-size:11px;color:#a0aec0;text-align:right;margin-top:12px;font-style:italic}
+body{font-family:Arial,sans-serif;background:#f0f4f8;color:#1a202c;font-size:14px;padding:16px}
+h1{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:#718096;font-size:13px;margin-bottom:20px}
+.tabs{display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:20px}
+.tab{padding:10px 24px;border:none;background:none;color:#718096;cursor:pointer;font-size:14px;font-weight:500;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.active{color:#1d9e75;border-bottom-color:#1d9e75;font-weight:700}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stitle{font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+select{width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:Arial,sans-serif;background:#fff;color:#1a202c}
+select:focus{outline:none;border-color:#1d9e75}
+.msg{font-size:12px;color:#718096;margin-top:8px;text-align:center}
+.msg.err{color:#c53030}
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.gc{background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.gh{background:#1d9e75;color:#fff;padding:6px 10px;font-size:12px;font-weight:700}
+.ti{display:flex;align-items:center;gap:6px;padding:5px 8px;border-bottom:1px solid #f0f4f8;font-size:12px}
+.ti:last-child{border-bottom:none}
+.pb{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.p1{background:#f5c842;color:#7a5c00}
+.p2{background:#b0bec5;color:#37474f}
+.p3{background:#e2e8f0;color:#718096}
+.p4{background:#e2e8f0;color:#a0aec0}
+.tn{flex:1;font-size:11px}
+.bracket-wrap{overflow-x:auto;padding:4px 0 8px}
+.bracket{display:flex;align-items:stretch;min-width:900px}
+.bcol{display:flex;flex-direction:column;flex:1;min-width:100px;padding:0 3px}
+.bhead{text-align:center;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;padding:4px 0 6px;border-bottom:2px solid #e2e8f0;margin-bottom:6px}
+.bmatch{border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fff;margin:3px 0}
+.bteam{display:flex;align-items:center;gap:4px;padding:4px 7px;font-size:11px;min-height:24px}
+.bteam.win{background:#f0fdf4;color:#276749;font-weight:700}
+.bteam.tbd{color:#a0aec0;font-style:italic}
+.bsep{height:1px;background:#e2e8f0}
+.bcenter{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;padding:0 6px}
+.ctrophy{border:2px solid #f5c842;border-radius:10px;padding:10px;background:#fffde7;text-align:center;min-width:100px}
+.ctitle{font-size:10px;font-weight:700;color:#7a5c00;text-transform:uppercase;margin-bottom:6px}
+.cteam{font-size:12px;font-weight:700;color:#7a5c00;padding:4px}
+.extras{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ebox{background:#f7fafc;border-radius:8px;padding:8px 10px}
+.elabel{font-size:10px;color:#718096;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.eval{font-size:13px;font-weight:600}
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{background:#1a202c;color:#fff;padding:8px 10px;font-size:11px;font-weight:700;text-align:left}
+.rtable td{padding:8px 10px;border-bottom:1px solid #f0f4f8;font-size:13px}
+.rtable tr:hover td{background:#f7fafc}
+.rtable tr:last-child td{border-bottom:none}
+.rpos{font-weight:700;text-align:center}
+.rpos.g1{color:#b8860b}.rpos.g2{color:#708090}.rpos.g3{color:#a0522d}
+.rpill{display:inline-block;padding:2px 10px;border-radius:999px;background:#e2e8f0;font-weight:700}
+.rpill.g1{background:#fef9c3;color:#7a5c00}
+.rpill.g2{background:#f1f5f9;color:#475569}
+.rpill.g3{background:#fff5f5;color:#a0522d}
+.lupdate{font-size:11px;color:#a0aec0;text-align:right;margin-top:8px;font-style:italic}
+.empty{text-align:center;padding:30px;color:#a0aec0}
 </style>
 </head>
 <body>
-
-<h1>⚽ Mundiporra 2026</h1>
-<p class="subtitle">Consulta les apostes i el ranking de tots els participants</p>
+<h1>Mundiporra 2026</h1>
+<p class="sub">Consulta les apostes i el ranking de tots els participants</p>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="showTab('apostes', this)">📋 Apostes</button>
-  <button class="tab-btn" onclick="showTab('ranking', this)">🏆 Ranking</button>
+  <button class="tab active" onclick="showTab('apostes',this)">Apostes</button>
+  <button class="tab" onclick="showTab('ranking',this)">Ranking</button>
 </div>
 
-<!-- PANEL APOSTES -->
-<div id="panel-apostes" class="tab-panel active">
+<div id="panel-apostes" class="panel active">
   <div class="card">
-    <p class="section-title">Selecciona un participant</p>
-    <div class="selector-row">
-      <select id="participantSelect" onchange="loadParticipant()">
-        <option value="">-- Carregant participants... --</option>
-      </select>
-    </div>
-    <div id="statusMsg" class="status"></div>
+    <p class="stitle">Selecciona un participant</p>
+    <select id="sel" onchange="loadBet()">
+      <option value="">-- Carregant... --</option>
+    </select>
+    <div id="msg" class="msg"></div>
   </div>
   <div id="content"></div>
 </div>
 
-<!-- PANEL RANKING -->
-<div id="panel-ranking" class="tab-panel">
+<div id="panel-ranking" class="panel">
   <div class="card">
-    <p class="section-title">🏆 Classificació general</p>
-    <div id="rankingContent">
-      <div class="loading" style="text-align:center;padding:30px;color:#718096">Carregant ranking...</div>
-    </div>
+    <p class="stitle">Classificacio general</p>
+    <div id="rankContent"><p class="empty">Carregant...</p></div>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_27n09y7kZ8tEvdzNvMzWAlu9PM3qlSChF-ENtnrxJiU9BeJO/exec";
+var GS = "https://script.google.com/macros/s/AKfycbz5zEsBi3ZLEYMMtTL_27n09y7kZ8tEvdzNvMzWAlu9PM3qlSChF-ENtnrxJiU9BeJO/exec";
+var bets = [];
 
-const GROUPS_KEYS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-
-const FLAGS = {
-  "Mexico":"MX","Corea del Sur":"KR","Sudafrica":"ZA","Rep. Checa":"CZ",
-  "Canada":"CA","Bosnia-Herz.":"BA","Qatar":"QA","Suiza":"CH",
-  "Brasil":"BR","Marruecos":"MA","Escocia":"GB-SCT","Haiti":"HT",
-  "EE.UU.":"US","Paraguay":"PY","Australia":"AU","Turquia":"TR",
-  "Alemania":"DE","Ecuador":"EC","C. de Marfil":"CI","Curazao":"CW",
-  "Paises Bajos":"NL","Japon":"JP","Suecia":"SE","Tunez":"TN",
-  "Belgica":"BE","Iran":"IR","Egipto":"EG","Nueva Zelanda":"NZ",
-  "Espana":"ES","Uruguay":"UY","Arabia Saudita":"SA","Cabo Verde":"CV",
-  "Francia":"FR","Senegal":"SN","Noruega":"NO","Irak":"IQ",
-  "Argentina":"AR","Austria":"AT","Argelia":"DZ","Jordania":"JO",
-  "Portugal":"PT","Colombia":"CO","R.D. Congo":"CD","Uzbekistan":"UZ",
-  "Inglaterra":"GB-ENG","Croacia":"HR","Panama":"PA","Ghana":"GH"
-};
-function normName(s){
-  return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-}
-function flagFor(name){
-  var n = normName(name);
-  var keys = Object.keys(FLAGS);
-  for(var i=0;i<keys.length;i++){
-    if(normName(keys[i])===n) return "";
-  }
-  return "";
+function showTab(tab, btn) {
+  var panels = document.querySelectorAll('.panel');
+  var tabs = document.querySelectorAll('.tab');
+  for (var i=0; i<panels.length; i++) panels[i].classList.remove('active');
+  for (var i=0; i<tabs.length; i++) tabs[i].classList.remove('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'ranking') loadRanking();
 }
 
-let allBets = [];
+function jsonp(url, cb) {
+  var id = 'cb_' + Date.now();
+  var s = document.createElement('script');
+  s.src = url + '&callback=' + id;
+  var timer = setTimeout(function() {
+    delete window[id]; s.remove();
+    cb(null, new Error('Timeout'));
+  }, 12000);
+  window[id] = function(data) {
+    clearTimeout(timer); delete window[id]; s.remove();
+    cb(data, null);
+  };
+  s.onerror = function() {
+    clearTimeout(timer); delete window[id]; s.remove();
+    cb(null, new Error('Error de xarxa'));
+  };
+  document.head.appendChild(s);
+}
 
-function jsonpCall(url, cbName, timeout=12000){
-  return new Promise((resolve,reject)=>{
-    const old=document.getElementById('sc_'+cbName); if(old) old.remove();
-    const timer=setTimeout(()=>{cleanup();reject(new Error('Timeout'));},timeout);
-    function cleanup(){clearTimeout(timer);const s=document.getElementById('sc_'+cbName);if(s)s.remove();delete window[cbName];}
-    window[cbName]=(data)=>{cleanup();resolve(data);};
-    const script=document.createElement('script');
-    script.id='sc_'+cbName;
-    script.src=url+'&callback='+cbName;
-    script.onerror=()=>{cleanup();reject(new Error('Error de red'));};
-    document.head.appendChild(script);
+function loadAll() {
+  var sel = document.getElementById('sel');
+  var msg = document.getElementById('msg');
+  jsonp(GS + '?action=getAll', function(data, err) {
+    if (err || !data || !data.ok) {
+      msg.className = 'msg err';
+      msg.textContent = 'Error: ' + (err ? err.message : (data && data.error) || 'desconegut');
+      sel.innerHTML = '<option value="">-- Error --</option>';
+      return;
+    }
+    bets = (data.bets || []).filter(function(b) { return b.nombre; });
+    var opts = '<option value="">-- Tria un participant --</option>';
+    for (var i=0; i<bets.length; i++) {
+      opts += '<option value="' + i + '">' + esc(bets[i].nombre) + '</option>';
+    }
+    sel.innerHTML = opts;
+    msg.textContent = bets.length + ' participants carregats';
   });
 }
 
-async function loadAllBets(){
-  const sel=document.getElementById('participantSelect');
-  const status=document.getElementById('statusMsg');
-  try{
-    const data = await jsonpCall(SCRIPT_URL+'?action=getAll','cb_loadall');
-    if(!data.ok){ status.className='status err'; status.textContent='Error: '+data.error; return; }
-    allBets = (data.bets||[]).filter(b=>b.nombre);
-    sel.innerHTML = '<option value="">-- Tria un participant --</option>' +
-      allBets.map((b,i)=>`<option value="${i}">${escapeHtml(b.nombre)}</option>`).join('');
-    status.textContent = allBets.length + ' participants carregats';
-  }catch(e){
-    status.className='status err';
-    status.textContent = 'No es va poder connectar: ' + e.message;
-    sel.innerHTML = '<option value="">-- Error de connexió --</option>';
-  }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function loadParticipant(){
-  const sel=document.getElementById('participantSelect');
-  const idx=sel.value;
-  const content=document.getElementById('content');
-  if(idx===''){ content.innerHTML=''; return; }
-  renderBet(allBets[idx]);
+function loadBet() {
+  var sel = document.getElementById('sel');
+  var content = document.getElementById('content');
+  if (!sel.value) { content.innerHTML = ''; return; }
+  renderBet(bets[parseInt(sel.value)]);
 }
 
-function renderBet(bet){
-  const content=document.getElementById('content');
+var GK = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+function renderBet(b) {
+  var content = document.getElementById('content');
   content.innerHTML = '';
 
-  // -- GRUPOS --
-  const groupsCard=document.createElement('div');
-  groupsCard.className='card';
-  groupsCard.innerHTML='<p class="section-title"> Fase de grups</p>';
-  const groupsGrid=document.createElement('div');
-  groupsGrid.className='groups-grid';
-  GROUPS_KEYS.forEach(g=>{
-    const teams=[1,2,3,4].map(p=>bet['G'+g+'_'+p]).filter(Boolean);
-    if(teams.length===0) return;
-    const gc=document.createElement('div');
-    gc.className='group-card';
-    gc.innerHTML=`<div class="group-header">Grup ${g}</div>`;
-    teams.forEach((t,i)=>{
-      const pc=['p1','p2','p3','p4'][i], pl=['1r','2n','3r','4t'][i];
-      gc.innerHTML+=`<div class="team-item"><div class="pos-badge ${pc}">${pl}</div><span class="tf">${flagFor(t)}</span><span class="tn">${t}</span></div>`;
+  // GRUPS
+  var gc = document.createElement('div'); gc.className = 'card';
+  gc.innerHTML = '<p class="stitle">Fase de Grups</p>';
+  var gg = document.createElement('div'); gg.className = 'groups-grid';
+  GK.forEach(function(g) {
+    var teams = [1,2,3,4].map(function(p){ return b['G'+g+'_'+p]; }).filter(Boolean);
+    if (!teams.length) return;
+    var card = document.createElement('div'); card.className = 'gc';
+    card.innerHTML = '<div class="gh">Grup ' + g + '</div>';
+    var labels = ['1r','2n','3r','4t'];
+    var cls = ['p1','p2','p3','p4'];
+    teams.forEach(function(t,i) {
+      card.innerHTML += '<div class="ti"><div class="pb '+cls[i]+'">'+labels[i]+'</div><span class="tn">'+esc(t)+'</span></div>';
     });
-    groupsGrid.appendChild(gc);
+    gg.appendChild(card);
   });
-  groupsCard.appendChild(groupsGrid);
-  content.appendChild(groupsCard);
+  gc.appendChild(gg);
+  content.appendChild(gc);
 
-  // -- BRACKET (misma estructura visual que el formulario) --
-  const bracketCard=document.createElement('div');
-  bracketCard.className='card';
-  bracketCard.style.padding='12px';
-  bracketCard.innerHTML='<p class="section-title" style="margin-left:8px"> Eliminatòries</p>';
-  const scrollWrap=document.createElement('div');
-  scrollWrap.className='bracket-scroll';
-  const tree=document.createElement('div');
-  tree.className='bracket-tree';
-  scrollWrap.appendChild(tree);
-  bracketCard.appendChild(scrollWrap);
-  content.appendChild(bracketCard);
+  // BRACKET
+  var bc = document.createElement('div'); bc.className = 'card';
+  bc.style.padding = '12px';
+  bc.innerHTML = '<p class="stitle">Eliminatories</p>';
+  var bw = document.createElement('div'); bw.className = 'bracket-wrap';
+  var bt = document.createElement('div'); bt.className = 'bracket';
+  bw.appendChild(bt); bc.appendChild(bw);
+  content.appendChild(bc);
+  buildBracket(bt, b);
 
-  buildAndRenderBracket(tree, bet);
-
-  // -- EXTRAS --
-  const extrasCard=document.createElement('div');
-  extrasCard.className='card';
-  extrasCard.innerHTML='<p class="section-title"> Apostes especials</p>';
-  const grid=document.createElement('div');
-  grid.className='extras-grid';
-  const extras=[
-    ['Equip golejador', bet.goleador],
-    ['Equip revelació', bet.revelacion],
-    ['Pichichi', bet.pichichi],
-    ['Pachocho', bet.pachocho]
+  // APOSTES ESPECIALS
+  var ec = document.createElement('div'); ec.className = 'card';
+  ec.innerHTML = '<p class="stitle">Apostes Especials</p>';
+  var eg = document.createElement('div'); eg.className = 'extras';
+  var extras = [
+    ['Equip golejador', b.goleador],
+    ['Equip revelacio', b.revelacion],
+    ['Pichichi', b.pichichi],
+    ['Pachocho', b.pachocho]
   ];
-  extras.forEach(([label,val])=>{
-    grid.innerHTML+=`<div class="extra-box"><div class="extra-label">${label}</div><div class="extra-val">${val||'-'}</div></div>`;
+  extras.forEach(function(e) {
+    eg.innerHTML += '<div class="ebox"><div class="elabel">'+esc(e[0])+'</div><div class="eval">'+(e[1]?esc(e[1]):'--')+'</div></div>';
   });
-  extrasCard.appendChild(grid);
-  content.appendChild(extrasCard);
+  ec.appendChild(eg);
+  content.appendChild(ec);
 }
 
-// ------------------------------------------------------------
-// RECONSTRUCCION DEL BRACKET OFICIAL - misma logica que el formulario,
-// pero usando los datos YA GUARDADOS de la apuesta en vez de clicks en vivo
-// ------------------------------------------------------------
-
-// Definicion de origenes de cada partido de Ronda 32 (igual que en el formulario)
-// t:'g' = grupo[pos], t:'3' = indice del array de terceros
-const R32_SOURCES = {
-  m74:{a:{t:'g',g:'E',p:0}, b:{t:'3',i:0}},
-  m77:{a:{t:'g',g:'I',p:0}, b:{t:'3',i:1}},
-  m73:{a:{t:'g',g:'A',p:1}, b:{t:'g',g:'B',p:1}},
-  m75:{a:{t:'g',g:'F',p:0}, b:{t:'g',g:'C',p:1}},
-  m83:{a:{t:'g',g:'K',p:1}, b:{t:'g',g:'L',p:1}},
-  m84:{a:{t:'g',g:'H',p:0}, b:{t:'g',g:'J',p:1}},
-  m81:{a:{t:'g',g:'D',p:0}, b:{t:'3',i:4}},
-  m82:{a:{t:'g',g:'G',p:0}, b:{t:'3',i:5}},
-  m76:{a:{t:'g',g:'C',p:0}, b:{t:'g',g:'F',p:1}},
-  m78:{a:{t:'g',g:'E',p:1}, b:{t:'g',g:'I',p:1}},
-  m79:{a:{t:'g',g:'A',p:0}, b:{t:'3',i:2}},
-  m80:{a:{t:'g',g:'L',p:0}, b:{t:'3',i:3}},
-  m86:{a:{t:'g',g:'J',p:0}, b:{t:'g',g:'H',p:1}},
-  m88:{a:{t:'g',g:'D',p:1}, b:{t:'g',g:'G',p:1}},
-  m85:{a:{t:'g',g:'B',p:0}, b:{t:'3',i:6}},
-  m87:{a:{t:'g',g:'K',p:0}, b:{t:'3',i:7}},
+// BRACKET RECONSTRUCTION
+var R32 = ['m74','m77','m73','m75','m83','m84','m81','m82','m76','m78','m79','m80','m86','m88','m85','m87'];
+var R32SRC = {
+  m74:{a:{t:'g',g:'E',p:1},b:{t:'3',i:0}},
+  m77:{a:{t:'g',g:'I',p:1},b:{t:'3',i:1}},
+  m73:{a:{t:'g',g:'A',p:2},b:{t:'g',g:'B',p:2}},
+  m75:{a:{t:'g',g:'F',p:1},b:{t:'g',g:'C',p:2}},
+  m83:{a:{t:'g',g:'K',p:2},b:{t:'g',g:'L',p:2}},
+  m84:{a:{t:'g',g:'H',p:1},b:{t:'g',g:'J',p:2}},
+  m81:{a:{t:'g',g:'D',p:1},b:{t:'3',i:4}},
+  m82:{a:{t:'g',g:'G',p:1},b:{t:'3',i:5}},
+  m76:{a:{t:'g',g:'C',p:1},b:{t:'g',g:'F',p:2}},
+  m78:{a:{t:'g',g:'E',p:2},b:{t:'g',g:'I',p:2}},
+  m79:{a:{t:'g',g:'A',p:1},b:{t:'3',i:2}},
+  m80:{a:{t:'g',g:'L',p:1},b:{t:'3',i:3}},
+  m86:{a:{t:'g',g:'J',p:1},b:{t:'g',g:'H',p:2}},
+  m88:{a:{t:'g',g:'D',p:2},b:{t:'g',g:'G',p:2}},
+  m85:{a:{t:'g',g:'B',p:1},b:{t:'3',i:6}},
+  m87:{a:{t:'g',g:'K',p:1},b:{t:'3',i:7}}
 };
 
-function resolveR32Source(src, bet, tercerosList){
-  if(src.t==='g') return bet['G'+src.g+'_'+(src.p+1)] || null;
-  if(src.t==='3') return tercerosList[src.i] || null;
+function resolveSrc(src, b, t3) {
+  if (src.t === 'g') return b['G'+src.g+'_'+src.p] || null;
+  if (src.t === '3') return t3[src.i] || null;
   return null;
 }
-// Cruces de Octavos (mismos que el formulario): cada uno cruza 2 partidos de R32
-const OCT_DEFS = [
-  {id:'m89', from:['m74','m77']}, {id:'m90', from:['m73','m75']},
-  {id:'m91', from:['m76','m78']}, {id:'m92', from:['m79','m80']},
-  {id:'m93', from:['m83','m84']}, {id:'m94', from:['m81','m82']},
-  {id:'m95', from:['m86','m88']}, {id:'m96', from:['m85','m87']},
-];
-// Cruces de Cuartos
-const QF_DEFS = [
-  {id:'m97',  from:['m89','m90']}, {id:'m98',  from:['m93','m94']},
-  {id:'m99',  from:['m91','m92']}, {id:'m100', from:['m95','m96']},
-];
-// Cruces de Semis
-const SF_DEFS = [
-  {id:'m101', from:['m97','m98']}, {id:'m102', from:['m99','m100']},
-];
 
-function buildAndRenderBracket(tree, bet){
-  const tercerosList = (bet.terceros||'').split('|').map(s=>s.trim()).filter(Boolean);
-  const r32List = (bet.r32_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
+function findWinner(candidates, pool) {
+  for (var i=0; i<pool.length; i++) {
+    for (var j=0; j<candidates.length; j++) {
+      if (pool[i] && candidates[j] && pool[i].toLowerCase() === candidates[j].toLowerCase()) {
+        var w = pool[i];
+        pool.splice(i, 1);
+        return w;
+      }
+    }
+  }
+  return null;
+}
 
-  // 1. Para cada partido de R32, resolver los DOS equipos reales (desde grupos/terceros)
-  //    y determinar cual es el ganador (segun r32_winners)
-  const winnerOf = {};
-  const teamsOf  = {}; // mid -> [teamA, teamB]
-  Object.keys(R32_SOURCES).forEach(mid=>{
-    const src = R32_SOURCES[mid];
-    const teamA = resolveR32Source(src.a, bet, tercerosList);
-    const teamB = resolveR32Source(src.b, bet, tercerosList);
-    teamsOf[mid] = [teamA, teamB];
-    // El ganador es el que aparece en r32_winners
-    let winner = null;
-    if(teamA && r32List.includes(teamA)) winner = teamA;
-    else if(teamB && r32List.includes(teamB)) winner = teamB;
-    winnerOf[mid] = winner;
+function buildBracket(tree, b) {
+  var t3 = (b.terceros||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+  var r32pool = (b.r32_winners||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+  var octpool = (b.oct_winners||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+  var qfpool  = (b.qf_winners||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+  var sfpool  = (b.sf_winners||'').split('|').map(function(s){return s.trim();}).filter(Boolean);
+  var champ   = b.campeon || b.final_winner || '';
+
+  var W = {}; // matchId -> winner
+  var T = {}; // matchId -> [teamA, teamB]
+
+  R32.forEach(function(mid) {
+    var src = R32SRC[mid];
+    var a = resolveSrc(src.a, b, t3);
+    var z = resolveSrc(src.b, b, t3);
+    T[mid] = [a, z];
+    W[mid] = findWinner([a,z], r32pool.slice()) || null;
+    // consume from pool
+    findWinner([a,z], r32pool);
   });
 
-  // 2. Para cada cruce de Octavos, deducir cual de los 2 posibles paso
-  //    comparando con oct_winners (la lista de los que SI pasaron)
-  let octPool = (bet.oct_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  OCT_DEFS.forEach(def=>{
-    const candA = winnerOf[def.from[0]];
-    const candB = winnerOf[def.from[1]];
-    let winner = null;
-    if(candA && octPool.includes(candA)){ winner=candA; octPool.splice(octPool.indexOf(candA),1); }
-    else if(candB && octPool.includes(candB)){ winner=candB; octPool.splice(octPool.indexOf(candB),1); }
-    winnerOf[def.id] = winner;
+  var OCT = [
+    {id:'m89',from:['m74','m77']},{id:'m90',from:['m73','m75']},
+    {id:'m91',from:['m76','m78']},{id:'m92',from:['m79','m80']},
+    {id:'m93',from:['m83','m84']},{id:'m94',from:['m81','m82']},
+    {id:'m95',from:['m86','m88']},{id:'m96',from:['m85','m87']}
+  ];
+  OCT.forEach(function(o) {
+    var a = W[o.from[0]], z = W[o.from[1]];
+    T[o.id] = [a,z];
+    W[o.id] = findWinner([a,z], octpool);
   });
 
-  // 3. Cuartos
-  let qfPool = (bet.qf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  QF_DEFS.forEach(def=>{
-    const candA = winnerOf[def.from[0]];
-    const candB = winnerOf[def.from[1]];
-    let winner = null;
-    if(candA && qfPool.includes(candA)){ winner=candA; qfPool.splice(qfPool.indexOf(candA),1); }
-    else if(candB && qfPool.includes(candB)){ winner=candB; qfPool.splice(qfPool.indexOf(candB),1); }
-    winnerOf[def.id] = winner;
+  var QF = [
+    {id:'m97',from:['m89','m90']},{id:'m98',from:['m93','m94']},
+    {id:'m99',from:['m91','m92']},{id:'m100',from:['m95','m96']}
+  ];
+  QF.forEach(function(q) {
+    var a = W[q.from[0]], z = W[q.from[1]];
+    T[q.id] = [a,z];
+    W[q.id] = findWinner([a,z], qfpool);
   });
 
-  // 4. Semis
-  let sfPool = (bet.sf_winners||'').split('|').map(s=>s.trim()).filter(Boolean);
-  SF_DEFS.forEach(def=>{
-    const candA = winnerOf[def.from[0]];
-    const candB = winnerOf[def.from[1]];
-    let winner = null;
-    if(candA && sfPool.includes(candA)){ winner=candA; sfPool.splice(sfPool.indexOf(candA),1); }
-    else if(candB && sfPool.includes(candB)){ winner=candB; sfPool.splice(sfPool.indexOf(candB),1); }
-    winnerOf[def.id] = winner;
+  var SF = [
+    {id:'m101',from:['m97','m98']},{id:'m102',from:['m99','m100']}
+  ];
+  SF.forEach(function(s) {
+    var a = W[s.from[0]], z = W[s.from[1]];
+    T[s.id] = [a,z];
+    W[s.id] = findWinner([a,z], sfpool);
   });
 
-  const champ = bet.campeon || bet.final_winner || '';
+  T['m104'] = [W['m101'], W['m102']];
+  W['m104'] = champ || null;
 
-  // -- Helpers para construir las cajas visuales (misma estructura que el formulario) --
-  function teamRow(name, isWinner){
-    const row=document.createElement('div');
-    row.className='b-team'+(isWinner?' winner':'')+(name?'':' tbd');
-    row.innerHTML = name ? `<span class="b-flag">${flagFor(name)}</span><span class="b-name">${name}</span>` : `<span class="b-name">-</span>`;
-    return row;
+  function teamRow(name, isWin) {
+    var d = document.createElement('div');
+    d.className = 'bteam' + (isWin ? ' win' : '') + (name ? '' : ' tbd');
+    d.innerHTML = '<span class="tn">' + (name ? esc(name) : '--') + '</span>';
+    return d;
   }
 
-  // Ronda 32: ahora SI tenemos los dos equipos reales (desde grupos/terceros)
-  function r32MatchBox(mid){
-    const wrap=document.createElement('div'); wrap.className='b-match';
-    const [teamA, teamB] = teamsOf[mid];
-    const winner = winnerOf[mid];
-    wrap.appendChild(teamRow(teamA, winner && teamA===winner));
-    const sep=document.createElement('div'); sep.className='b-sep'; wrap.appendChild(sep);
-    wrap.appendChild(teamRow(teamB, winner && teamB===winner));
+  function matchBox(mid) {
+    var wrap = document.createElement('div'); wrap.className = 'bmatch';
+    var teams = T[mid] || [null,null];
+    var winner = W[mid];
+    wrap.appendChild(teamRow(teams[0], winner && teams[0] && teams[0]===winner));
+    var sep = document.createElement('div'); sep.className = 'bsep'; wrap.appendChild(sep);
+    wrap.appendChild(teamRow(teams[1], winner && teams[1] && teams[1]===winner));
     return wrap;
   }
 
-  function matchBox(defId, fromIds){
-    const wrap=document.createElement('div'); wrap.className='b-match';
-    const a = winnerOf[fromIds[0]];
-    const b = winnerOf[fromIds[1]];
-    const winner = winnerOf[defId];
-    wrap.appendChild(teamRow(a, winner && a===winner));
-    const sep=document.createElement('div'); sep.className='b-sep'; wrap.appendChild(sep);
-    wrap.appendChild(teamRow(b, winner && b===winner));
-    return wrap;
-  }
-
-  function makeCol(label, boxes){
-    const col=document.createElement('div'); col.className='b-col';
-    const h=document.createElement('div'); h.className='b-col-header'; h.textContent=label; col.appendChild(h);
-    const wrap=document.createElement('div');
-    wrap.style.cssText='display:flex;flex-direction:column;flex:1;justify-content:space-around;gap:4px';
-    boxes.forEach(b=>wrap.appendChild(b));
+  function makeCol(label, ids) {
+    var col = document.createElement('div'); col.className = 'bcol';
+    var h = document.createElement('div'); h.className = 'bhead'; h.textContent = label; col.appendChild(h);
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;flex:1;justify-content:space-around;gap:3px';
+    ids.forEach(function(id){ wrap.appendChild(matchBox(id)); });
     col.appendChild(wrap);
     return col;
   }
 
-  // -- Construir mitad izquierda --
-  const leftHalf=document.createElement('div');
-  leftHalf.style.cssText='display:flex;flex:1;align-items:stretch';
+  // Left half
+  var left = document.createElement('div'); left.style.cssText = 'display:flex;flex:1;align-items:stretch';
+  left.appendChild(makeCol('Ronda 32', ['m74','m77','m73','m75','m83','m84','m81','m82']));
+  left.appendChild(makeCol('Octavos', ['m89','m90','m93','m94']));
+  left.appendChild(makeCol('Quarts', ['m97','m98']));
+  left.appendChild(makeCol('Semifinal', ['m101']));
+  tree.appendChild(left);
 
-  const leftR32Ids = ['m74','m77','m73','m75','m83','m84','m81','m82'];
-  leftHalf.appendChild(makeCol('Ronda 32', leftR32Ids.map(r32MatchBox)));
-
-  leftHalf.appendChild(makeCol('Octavos', [
-    matchBox('m89',['m74','m77']), matchBox('m90',['m73','m75']),
-    matchBox('m93',['m83','m84']), matchBox('m94',['m81','m82'])
-  ]));
-
-  leftHalf.appendChild(makeCol('Cuartos', [
-    matchBox('m97',['m89','m90']), matchBox('m98',['m93','m94'])
-  ]));
-
-  leftHalf.appendChild(makeCol('Semifinal', [
-    matchBox('m101',['m97','m98'])
-  ]));
-
-  tree.appendChild(leftHalf);
-
-  // -- Centro: Final + Campeón --
-  const center=document.createElement('div');
-  center.className='b-center';
-
-  const finalLabel=document.createElement('div');
-  finalLabel.className='b-col-header';
-  finalLabel.style.marginBottom='8px';
-  finalLabel.textContent='Final';
-  center.appendChild(finalLabel);
-
-  const finalBox = matchBox('m104',['m101','m102']);
-  finalBox.style.marginBottom='12px';
-  center.appendChild(finalBox);
-
-  const champBox=document.createElement('div');
-  champBox.className='champ-trophy';
-  champBox.innerHTML='<h3> Campeón</h3>';
-  if(champ){
-    const row=document.createElement('div');
-    row.className='champ-team selected';
-    row.innerHTML=`<span style="font-size:20px">${flagFor(champ)}</span><span style="font-size:13px;flex:1;font-weight:700">${champ}</span><span></span>`;
-    champBox.appendChild(row);
+  // Center
+  var center = document.createElement('div'); center.className = 'bcenter';
+  var fh = document.createElement('div'); fh.className = 'bhead'; fh.style.marginBottom='8px'; fh.textContent = 'Final';
+  center.appendChild(fh);
+  var fm = matchBox('m104'); fm.style.marginBottom = '10px'; center.appendChild(fm);
+  var ct = document.createElement('div'); ct.className = 'ctrophy';
+  ct.innerHTML = '<div class="ctitle">Campion</div>';
+  if (champ) {
+    ct.innerHTML += '<div class="cteam">' + esc(champ) + '</div>';
   } else {
-    champBox.innerHTML+='<div class="champ-empty">Sense campió triat</div>';
+    ct.innerHTML += '<div style="font-size:11px;color:#a0aec0">--</div>';
   }
-  center.appendChild(champBox);
+  center.appendChild(ct);
   tree.appendChild(center);
 
-  // -- Mitad derecha (invertida) --
-  const rightHalf=document.createElement('div');
-  rightHalf.style.cssText='display:flex;flex:1;align-items:stretch;flex-direction:row-reverse';
-
-  const rightR32Ids = ['m76','m78','m79','m80','m86','m88','m85','m87'];
-  rightHalf.appendChild(makeCol('Ronda 32', rightR32Ids.map(r32MatchBox)));
-
-  rightHalf.appendChild(makeCol('Octavos', [
-    matchBox('m91',['m76','m78']), matchBox('m92',['m79','m80']),
-    matchBox('m95',['m86','m88']), matchBox('m96',['m85','m87'])
-  ]));
-
-  rightHalf.appendChild(makeCol('Cuartos', [
-    matchBox('m99',['m91','m92']), matchBox('m100',['m95','m96'])
-  ]));
-
-  rightHalf.appendChild(makeCol('Semifinal', [
-    matchBox('m102',['m99','m100'])
-  ]));
-
-  tree.appendChild(rightHalf);
-
-  // Si no hay ningun dato, mostrar estado vacio
-  if(!r32List.length && !champ){
-    tree.innerHTML = '<div class="empty-state" style="width:100%"><div class="ico"></div>Aquest participant encara no ha completat el bracket</div>';
-  }
+  // Right half
+  var right = document.createElement('div'); right.style.cssText = 'display:flex;flex:1;align-items:stretch;flex-direction:row-reverse';
+  right.appendChild(makeCol('Ronda 32', ['m76','m78','m79','m80','m86','m88','m85','m87']));
+  right.appendChild(makeCol('Octavos', ['m91','m92','m95','m96']));
+  right.appendChild(makeCol('Quarts', ['m99','m100']));
+  right.appendChild(makeCol('Semifinal', ['m102']));
+  tree.appendChild(right);
 }
 
-function showTab(tab, btn){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+tab).classList.add('active');
-  if(btn) btn.classList.add('active');
-  if(tab==='ranking') loadRanking();
-}
-
-async function loadRanking(){
-  const el=document.getElementById('rankingContent');
-  el.innerHTML='<div style="text-align:center;padding:30px;color:#718096">Carregant...</div>';
-  try{
-    const data = await jsonpCall(SCRIPT_URL+'?action=getRanking','cb_ranking');
-    if(!data.ok){ el.innerHTML='<p style="color:#c53030;text-align:center">'+data.error+'</p>'; return; }
-    const rows = data.ranking;
-    if(!rows||rows.length<=1){ el.innerHTML='<p style="color:#a0aec0;text-align:center">Encara no hi ha ranking calculat. L'admin ha d'executar "Calcular ranking" primer.</p>'; return; }
-    const headers = rows[0];
-    const dataRows = rows.slice(1).filter(r=>r[0]&&String(r[0]).match(/^\d+$/));
-
-    let html = '<table class="ranking-table"><thead><tr>';
-    headers.forEach((h,i)=>{
-      if(i<2) html+=`<th>${h}</th>`;
-      else if(String(h).trim()==='#') html+=`<th>#</th>`;
-      else html+=`<th style="text-align:right">${h}</th>`;
-    });
-    html+='</tr></thead><tbody>';
-
-    dataRows.forEach((row,idx)=>{
-      const pos = parseInt(row[0]);
-      const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
-      const pillClass = pos===1?'first':pos===2?'second':pos===3?'third':'';
-      html+=`<tr>`;
-      row.forEach((cell,i)=>{
-        if(i===0){
-          const emoji = pos===1?'':pos===2?'':pos===3?'':pos;
-          html+=`<td class="rank-pos ${posClass}">${emoji}</td>`;
-        } else if(i===row.length-1){
-          html+=`<td><span class="total-pill ${pillClass}">${cell} pts</span></td>`;
-        } else {
-          html+=`<td>${cell||''}</td>`;
-        }
-      });
-      html+='</tr>';
-    });
-    html+='</tbody></table>';
-
-    // Last update row (last row of sheet data)
-    const lastRow = rows[rows.length-1];
-    if(lastRow && String(lastRow[0]).includes('actualització')){
-      html+=`<p class="last-update">${lastRow[0]}</p>`;
+function loadRanking() {
+  var el = document.getElementById('rankContent');
+  el.innerHTML = '<p class="empty">Carregant ranking...</p>';
+  jsonp(GS + '?action=getRanking', function(data, err) {
+    if (err || !data || !data.ok) {
+      el.innerHTML = '<p class="empty" style="color:#c53030">Error: ' + (err ? err.message : (data && data.error) || 'desconegut') + '</p>';
+      return;
     }
-
+    var rows = data.ranking;
+    if (!rows || rows.length <= 1) {
+      el.innerHTML = '<p class="empty">Encara no hi ha ranking. L\'admin ha de calcular-lo primer.</p>';
+      return;
+    }
+    var headers = rows[0];
+    var dataRows = rows.slice(1).filter(function(r){ return r[0] && !isNaN(parseInt(r[0])); });
+    var html = '<table class="rtable"><thead><tr>';
+    headers.forEach(function(h,i){
+      html += '<th' + (i===headers.length-1?' style="text-align:right"':'') + '>' + esc(String(h)) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    dataRows.forEach(function(row) {
+      var pos = parseInt(row[0]);
+      var pc = pos===1?'g1':pos===2?'g2':pos===3?'g3':'';
+      var em = pos===1?'1r':pos===2?'2n':pos===3?'3r':pos;
+      html += '<tr>';
+      row.forEach(function(cell,i) {
+        if (i===0) html += '<td class="rpos '+pc+'">' + em + '</td>';
+        else if (i===row.length-1) html += '<td style="text-align:right"><span class="rpill '+pc+'">' + esc(String(cell||0)) + ' pts</span></td>';
+        else html += '<td>' + esc(String(cell||'')) + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    var last = rows[rows.length-1];
+    if (last && String(last[0]).indexOf('actualitz') >= 0) {
+      html += '<p class="lupdate">' + esc(String(last[0])) + '</p>';
+    }
     el.innerHTML = html;
-  }catch(e){
-    el.innerHTML='<p style="color:#c53030;text-align:center">Error: '+e.message+'</p>';
-  }
+  });
 }
 
-document.addEventListener('DOMContentLoaded', function(){ loadAllBets(); });
+window.onload = function() { loadAll(); };
 </script>
 </body>
 </html>
