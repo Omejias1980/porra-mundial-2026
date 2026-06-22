@@ -374,8 +374,11 @@ function loadRanking() {
     }
     var headers = rows[0];
     var dataRows = rows.slice(1).filter(function(r){ return r[0] && !isNaN(parseInt(r[0])); });
+    // Columna 2 es el email — la excluimos del ranking publico
+    var skipCol = 2;
     var html = '<table class="rtable"><thead><tr>';
     headers.forEach(function(h,i){
+      if (i === skipCol) return;
       html += '<th' + (i===headers.length-1?' style="text-align:right"':'') + '>' + esc(String(h)) + '</th>';
     });
     html += '</tr></thead><tbody>';
@@ -385,6 +388,7 @@ function loadRanking() {
       var em = pos===1?'1r':pos===2?'2n':pos===3?'3r':pos;
       html += '<tr>';
       row.forEach(function(cell,i) {
+        if (i === skipCol) return;
         if (i===0) html += '<td class="rpos '+pc+'">' + em + '</td>';
         else if (i===row.length-1) html += '<td style="text-align:right"><span class="rpill '+pc+'">' + esc(String(cell||0)) + ' pts</span></td>';
         else html += '<td>' + esc(String(cell||'')) + '</td>';
